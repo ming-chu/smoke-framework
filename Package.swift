@@ -1,4 +1,4 @@
-// swift-tools-version:4.1
+// swift-tools-version:5.0
 //
 // Copyright 2018-2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 //
@@ -29,18 +29,18 @@ let package = Package(
             targets: ["SmokeHTTP1"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/IBM-Swift/LoggerAPI.git", .upToNextMajor(from: "1.0.0")),
-        .package(url: "https://github.com/apple/swift-nio.git", from: "1.0.0"),
-        .package(url: "https://github.com/apple/swift-nio-extras.git", from: "0.1.3"),
-        .package(url: "https://github.com/amzn/smoke-http.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-log.git", .upToNextMajor(from: "1.0.0")),
+        .package(url: "https://github.com/apple/swift-nio.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-nio-extras.git", from: "1.0.0"),
+        .package(url: "https://github.com/amzn/smoke-http.git", .branch("swift_5_nio_2")),
     ],
     targets: [
         .target(
             name: "SmokeHTTP1",
-            dependencies: ["NIO", "NIOHTTP1", "NIOFoundationCompat", "NIOExtras", "SmokeOperations", "LoggerAPI"]),
+            dependencies: ["NIO", "NIOHTTP1", "NIOFoundationCompat", "NIOExtras", "SmokeOperations", "Logging"]),
         .target(
             name: "SmokeOperations",
-            dependencies: ["LoggerAPI"]),
+            dependencies: ["Logging"]),
         .target(
             name: "SmokeOperationsHTTP1",
             dependencies: ["SmokeOperations", "SmokeHTTP1", "QueryCoding",

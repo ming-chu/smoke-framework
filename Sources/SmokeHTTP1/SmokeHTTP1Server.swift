@@ -19,8 +19,11 @@ import Foundation
 import NIO
 import NIOHTTP1
 import NIOExtras
-import LoggerAPI
 import SmokeOperations
+import Logging
+
+private let logger = Logger(label:
+    "com.amazon.SmokeHTTP1.SmokeHTTP1Server")
 
 public struct ServerDefaults {
     static let defaultHost = "0.0.0.0"
@@ -113,7 +116,7 @@ public class SmokeHTTP1Server {
         }
         
         self.quiesce = ServerQuiescingHelper(group: eventLoopGroup)
-        self.fullyShutdownPromise = eventLoopGroup.next().newPromise()
+        self.fullyShutdownPromise = eventLoopGroup.next().makePromise()
         self.signalSource = DispatchSource.makeSignalSource(signal: SIGINT, queue: signalQueue)
         self.shutdownDispatchGroup = DispatchGroup()
         // enter the DispatchGroup during initialization so waiting for the
@@ -122,12 +125,12 @@ public class SmokeHTTP1Server {
         
         signalSource.setEventHandler { [unowned self] in
             self.signalSource.cancel()
-            Log.verbose("Received signal, initiating shutdown which should complete after the last request finished.")
+            logger.error("Received signal, initiating shutdown which should complete after the last request finished.")
 
             do {
                 try self.shutdown()
             } catch {
-                Log.error("Unable to shutdown server on signalSource: \(error)")
+                logger.error("Unable to shutdown server on signalSource: \(error)")
             }
         }
         signal(SIGINT, SIG_IGN)
@@ -140,7 +143,7 @@ public class SmokeHTTP1Server {
      either shutdown() is called or the surrounding application is being terminated.
      */
     public func start() throws {
-        Log.info("SmokeHTTP1Server starting on port \(port).")
+        logger.info("SmokeHTTP1Server starting on port \(port).")
         
         guard updateOnStart() else {
             // nothing to do; already started
@@ -156,11 +159,11 @@ public class SmokeHTTP1Server {
             .serverChannelOption(ChannelOptions.backlog, value: 256)
             .serverChannelOption(ChannelOptions.socket(SocketOptionLevel(SOL_SOCKET), SO_REUSEADDR), value: 1)
             .serverChannelInitializer { [unowned self] channel in
-                channel.pipeline.add(handler: self.quiesce.makeServerChannelHandler(channel: channel))
+                channel.pipeline.addHandler(self.quiesce.makeServerChannelHandler(channel: channel))
             }
             .childChannelInitializer { channel in
-                channel.pipeline.configureHTTPServerPipeline().then {
-                    channel.pipeline.add(handler: HTTP1ChannelInboundHandler(
+                channel.pipeline.configureHTTPServerPipeline().flatMap {
+                    channel.pipeline.addHandler(HTTP1ChannelInboundHandler(
                         handler: currentHandler,
                         invocationStrategy: currentInvocationStrategy))
                 }
@@ -172,7 +175,7 @@ public class SmokeHTTP1Server {
         
         channel = try bootstrap.bind(host: ServerDefaults.defaultHost, port: port).wait()
         
-        fullyShutdownPromise.futureResult.whenComplete { [unowned self] in
+        fullyShutdownPromise.futureResult.whenComplete { [unowned self] _ in
             do {
                 let shutdownCompletionHandlers = self.updateStateOnShutdownComplete()
                 
@@ -186,13 +189,13 @@ public class SmokeHTTP1Server {
                 // release any waiters for shutdown
                 self.shutdownDispatchGroup.leave()
             } catch {
-                Log.error("Server unable to shutdown cleanly following full shutdown.")
+                logger.error("Server unable to shutdown cleanly following full shutdown.")
             }
             
-            Log.info("SmokeHTTP1Server shutdown.")
+            logger.info("SmokeHTTP1Server shutdown.")
         }
         
-        Log.info("SmokeHTTP1Server started on port \(port).")
+        logger.info("SmokeHTTP1Server started on port \(port).")
     }
     
     /**

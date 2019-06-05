@@ -18,8 +18,11 @@ import Foundation
 import SmokeOperations
 import NIOHTTP1
 import SmokeHTTP1
-import LoggerAPI
 import ShapeCoding
+import Logging
+
+private let logger = Logger(label:
+    "com.amazon.SmokeOperationsHTTP1.OperationServerHTTP1RequestHandler")
 
 internal struct PingParameters {
     static let uri = "/ping"
@@ -72,7 +75,7 @@ struct OperationServerHTTP1RequestHandler<ContextType, SelectorType>: HTTP1Reque
                 responseHandler: responseHandler)
             return
         } catch {
-            Log.error("Unexpected handler selection error: \(error))")
+            logger.error("Unexpected handler selection error: \(error))")
             let smokeHTTP1RequestHead = SmokeHTTP1RequestHead(httpRequestHead: requestHead,
                                                               query: query,
                                                               pathShape: .null)

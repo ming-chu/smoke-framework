@@ -18,7 +18,10 @@
 import Foundation
 import NIO
 import NIOHTTP1
-import LoggerAPI
+import Logging
+
+private let logger = Logger(label:
+    "com.amazon.SmokeHTTP1.StandardHTTP1Response")
 
 /**
  Standard implementation of the HttpResponseHandler protocol to
@@ -46,7 +49,7 @@ struct StandardHTTP1ResponseHandler: HTTP1ResponseHandler {
                   responseComponents: HTTP1ServerResponseComponents) {
         let bodySize = handleComplete(status: status, responseComponents: responseComponents)
         
-        Log.info("Http response send: status '\(status.code)', body size '\(bodySize)'")
+        logger.info("Http response send: status '\(status.code)', body size '\(bodySize)'")
     }
     
     func completeInEventLoop(status: HTTPResponseStatus,
@@ -60,7 +63,7 @@ struct StandardHTTP1ResponseHandler: HTTP1ResponseHandler {
                           responseComponents: HTTP1ServerResponseComponents) {
         let bodySize = handleComplete(status: status, responseComponents: responseComponents)
         
-        Log.verbose("Http response send: status '\(status.code)', body size '\(bodySize)'")
+        logger.error("Http response send: status '\(status.code)', body size '\(bodySize)'")
     }
     
     func completeSilentlyInEventLoop(status: HTTPResponseStatus,
@@ -72,7 +75,6 @@ struct StandardHTTP1ResponseHandler: HTTP1ResponseHandler {
     
     private func handleComplete(status: HTTPResponseStatus,
                                 responseComponents: HTTP1ServerResponseComponents) -> Int {
-        let ctx = context
         var headers = HTTPHeaders()
         
         let buffer: ByteBuffer?
@@ -82,8 +84,8 @@ struct StandardHTTP1ResponseHandler: HTTP1ResponseHandler {
         if let body = responseComponents.body {
             let data = body.data
             // create a buffer for the body and copy the body into it
-            var newBuffer = ctx.channel.allocator.buffer(capacity: data.count)
-            newBuffer.write(bytes: data)
+            var newBuffer = context.channel.allocator.buffer(capacity: data.count)
+            newBuffer.writeBytes(data)
             
             buffer = newBuffer
             bodySize = data.count
@@ -102,24 +104,27 @@ struct StandardHTTP1ResponseHandler: HTTP1ResponseHandler {
         responseComponents.additionalHeaders.forEach { header in
             headers.add(name: header.0, value: header.1)
         }
-        ctx.write(self.wrapOutboundOut(.head(HTTPResponseHead(version: requestHead.version,
+        context.write(self.wrapOutboundOut(.head(HTTPResponseHead(version: requestHead.version,
                                                               status: status,
                                                               headers: headers))), promise: nil)
         
         // if there is a body, write it to the response
         if let buffer = buffer {
-            ctx.write(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
+            context.write(self.wrapOutboundOut(.body(.byteBuffer(buffer))), promise: nil)
         }
         
-        let promise: EventLoopPromise<Void>? = self.keepAliveStatus.state ? nil : ctx.eventLoop.newPromise()
+        let promise: EventLoopPromise<Void>? = self.keepAliveStatus.state ? nil : context.eventLoop.makePromise()
         if let promise = promise {
+            let currentContext = context
             // if keep alive is false, close the channel when the response end
             // has been written
-            promise.futureResult.whenComplete { ctx.close(promise: nil) }
+            promise.futureResult.whenComplete { _ in
+                currentContext.close(promise: nil)
+            }
         }
         
         // write the response end and flush
-        ctx.writeAndFlush(self.wrapOutboundOut(HTTPServerResponsePart.end(nil)),
+        context.writeAndFlush(self.wrapOutboundOut(HTTPServerResponsePart.end(nil)),
                           promise: promise)
         
         return bodySize

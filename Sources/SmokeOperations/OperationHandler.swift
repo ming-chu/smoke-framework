@@ -16,8 +16,10 @@
 //
 
 import Foundation
-import LoggerAPI
+import Logging
 
+private let logger = Logger(label:
+    "com.amazon.SmokeOperations.OperationHandler")
 /**
  Struct that handles serialization and de-serialization of request and response
  bodies from and to the shapes required by operation handlers.
@@ -53,9 +55,9 @@ public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType
             switch self {
             case .error(description: let description, reportableType: let reportableType):
                 if let reportableType = reportableType {
-                    Log.error("DecodingError [\(reportableType): \(description)")
+                    logger.error("DecodingError [\(reportableType): \(description)")
                 } else {
-                    Log.error("DecodingError: \(description)")
+                    logger.error("DecodingError: \(description)")
                 }
                 
                 operationDelegate.handleResponseForDecodingError(
@@ -67,7 +69,7 @@ public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType
                     // attempt to validate the input
                     try input.validate()
                 } catch SmokeOperationsError.validationError(let reason) {
-                    Log.info("ValidationError: \(reason)")
+                    logger.warning("ValidationError: \(reason)")
                     
                     operationDelegate.handleResponseForValidationError(
                         requestHead: requestHead,
@@ -75,7 +77,7 @@ public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType
                         responseHandler: responseHandler)
                     return
                 } catch {
-                    Log.info("ValidationError: \(error)")
+                    logger.warning("ValidationError: \(error)")
                     
                     operationDelegate.handleResponseForValidationError(
                         requestHead: requestHead,

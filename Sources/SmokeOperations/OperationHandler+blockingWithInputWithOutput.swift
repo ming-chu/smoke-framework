@@ -16,7 +16,10 @@
 //
 
 import Foundation
-import LoggerAPI
+import Logging
+
+private let logger = Logger(label:
+    "com.amazon.SmokeOperations.OperationHandler+blockingWithInputWithOutput")
 
 public extension OperationHandler {
     /**
@@ -32,7 +35,7 @@ public extension OperationHandler {
         - operationDelegate: optionally an operation-specific delegate to use when
           handling the operation.
      */
-    public init<InputType: Validatable, OutputType: Validatable, ErrorType: ErrorIdentifiableByDescription,
+    init<InputType: Validatable, OutputType: Validatable, ErrorType: ErrorIdentifiableByDescription,
         OperationDelegateType: OperationDelegate>(
             inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
             operation: @escaping (InputType, ContextType) throws -> OutputType,

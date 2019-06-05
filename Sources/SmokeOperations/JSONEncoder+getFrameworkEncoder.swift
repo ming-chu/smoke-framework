@@ -16,7 +16,10 @@
 //
 
 import Foundation
-import LoggerAPI
+import Logging
+
+private let logger = Logger(label:
+    "com.amazon.SwiftOperations.JSONEncoder+getFrameworkEncoder")
 
 private func createEncoder() -> JSONEncoder {
     let jsonEncoder = JSONEncoder()
@@ -63,7 +66,7 @@ extension JSONEncoder {
                     encodedError = try createEncoder().encode(payload)
                 }
             } catch {
-                Log.error("Unable to encode error message: \(error)")
+                logger.error("Unable to encode error message: \(error)")
                 
                 encodedError = encodedInternalError
             }

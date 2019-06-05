@@ -4,10 +4,7 @@
 </a>
 <img src="https://img.shields.io/badge/os-linux-green.svg?style=flat" alt="Linux">
 <a href="http://swift.org">
-<img src="https://img.shields.io/badge/swift-4.1-orange.svg?style=flat" alt="Swift 4.1 Compatible">
-</a>
-<a href="http://swift.org">
-<img src="https://img.shields.io/badge/swift-4.2-orange.svg?style=flat" alt="Swift 4.2 Compatible">
+<img src="https://img.shields.io/badge/swift-5.0-orange.svg?style=flat" alt="Swift 5.0 Compatible">
 </a>
 <a href="https://gitter.im/SmokeServerSide">
 <img src="https://img.shields.io/badge/chat-on%20gitter-ee115e.svg?style=flat" alt="Join the Smoke Server Side community on gitter">
@@ -133,7 +130,9 @@ The final step is to setup an application as an operation server.
 import Foundation
 import SmokeHTTP1
 import SmokeOperationsHTTP1
-import LoggerAPI
+import Logging
+
+private let logger = Logger(label: "com.company.MyApplication.main")
 
 // Enable logging here
 
@@ -149,7 +148,7 @@ do {
         //       of the operationsContext.
     }
 } catch {
-    Log.error("Unable to start Operation Server: '\(error)'")
+    logger.error("Unable to start Operation Server: '\(error)'")
 }
 ```
 

@@ -16,7 +16,10 @@
 //
 
 import Foundation
-import LoggerAPI
+import Logging
+
+private let logger = Logger(label:
+    "com.amazon.SmokeOperations.OperationHandlerExtensions")
 
 /**
  Possible results of an operation that has no output.
@@ -50,7 +53,7 @@ public extension OperationHandler {
           entry is a tuple specifying the error shape and the response code to use for
           returning that error.
      */
-    public static func fromSmokeReturnableError<ShapeType>(
+    static func fromSmokeReturnableError<ShapeType>(
         error: SmokeReturnableError,
         allowedErrors: [(ShapeType, Int)])
         -> OperationFailure? where ShapeType: ErrorIdentifiableByDescription {
@@ -81,7 +84,7 @@ public extension OperationHandler {
          - request: the current request.
          - responseHandler: the response handler to use.
      */
-    public static func handleNoOutputOperationHandlerResult<ErrorType, OperationDelegateType: OperationDelegate>(
+    static func handleNoOutputOperationHandlerResult<ErrorType, OperationDelegateType: OperationDelegate>(
         handlerResult: NoOutputOperationHandlerResult<ErrorType>,
         operationDelegate: OperationDelegateType,
         requestHead: OperationDelegateType.RequestHeadType,
@@ -90,7 +93,7 @@ public extension OperationHandler {
     ResponseHandlerType == OperationDelegateType.ResponseHandlerType {
             switch handlerResult {
             case .internalServerError(let error):
-                Log.error("Unexpected failure: \(error)")
+                logger.error("Unexpected failure: \(error)")
                 operationDelegate.handleResponseForInternalServerError(
                     requestHead: requestHead,
                     responseHandler: responseHandler)
@@ -103,7 +106,7 @@ public extension OperationHandler {
                             operationFailure: operationFailure,
                             responseHandler: responseHandler)
                 } else {
-                    Log.error("Unexpected error type returned: \(error)")
+                    logger.error("Unexpected error type returned: \(error)")
                     operationDelegate.handleResponseForInternalServerError(
                         requestHead: requestHead,
                         responseHandler: responseHandler)
@@ -113,7 +116,7 @@ public extension OperationHandler {
                     requestHead: requestHead,
                     responseHandler: responseHandler)
             case .validationError(let reason):
-                Log.info("ValidationError: \(reason)")
+                logger.warning("ValidationError: \(reason)")
                 operationDelegate.handleResponseForValidationError(
                     requestHead: requestHead,
                     message: reason,
@@ -132,7 +135,7 @@ public extension OperationHandler {
          - request: the current request.
          - responseHandler: the response handler to use.
      */
-    public static func handleWithOutputOperationHandlerResult<OutputType, ErrorType, OperationDelegateType: OperationDelegate>(
+    static func handleWithOutputOperationHandlerResult<OutputType, ErrorType, OperationDelegateType: OperationDelegate>(
         handlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>,
         operationDelegate: OperationDelegateType,
         requestHead: RequestHeadType,
@@ -142,7 +145,7 @@ public extension OperationHandler {
     ResponseHandlerType == OperationDelegateType.ResponseHandlerType {
             switch handlerResult {
             case .internalServerError(let error):
-                Log.error("Unexpected failure: \(error)")
+                logger.error("Unexpected failure: \(error)")
                 operationDelegate.handleResponseForInternalServerError(
                     requestHead: requestHead,
                     responseHandler: responseHandler)
@@ -155,7 +158,7 @@ public extension OperationHandler {
                             operationFailure: operationFailure,
                             responseHandler: responseHandler)
                 } else {
-                    Log.error("Unexpected error type returned: \(error)")
+                    logger.error("Unexpected error type returned: \(error)")
                     operationDelegate.handleResponseForInternalServerError(
                         requestHead: requestHead,
                         responseHandler: responseHandler)
@@ -166,14 +169,14 @@ public extension OperationHandler {
                     
                     outputHandler(requestHead, output, responseHandler)
                 } catch {
-                    Log.error("Serialization error: unable to get response: \(error)")
+                    logger.error("Serialization error: unable to get response: \(error)")
                     
                     operationDelegate.handleResponseForInternalServerError(
                         requestHead: requestHead,
                         responseHandler: responseHandler)
                 }
             case .validationError(let reason):
-                Log.info("ValidationError: \(reason)")
+                logger.warning("ValidationError: \(reason)")
                 operationDelegate.handleResponseForValidationError(
                     requestHead: requestHead,
                     message: reason,

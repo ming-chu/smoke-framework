@@ -17,10 +17,13 @@
 import Foundation
 import SmokeOperations
 import NIOHTTP1
-import LoggerAPI
 import SmokeHTTP1
 import HTTPPathCoding
 import ShapeCoding
+import Logging
+
+private let logger = Logger(label:
+    "com.amazon.SmokeOperationsHTTP1.StandardSmokeHTTP1HandlerSelector")
 
 /**
  Implementation of the SmokeHTTP1HandlerSelector protocol that selects a handler
@@ -67,7 +70,7 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
                 return tokenizedHandler
         }
         
-        Log.info("Operation handler selected with uri '\(lowerCasedUri)', method '\(httpMethod)'")
+        logger.info("Operation handler selected with uri '\(lowerCasedUri)', method '\(httpMethod)'")
         
         return (handler, .null)
     }
@@ -87,10 +90,10 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
             do {
                 shape = try pathSegments.getShapeForTemplate(templateSegments: handler.templateSegments)
             } catch HTTPPathDecoderErrors.pathDoesNotMatchTemplate(let reason) {
-                Log.verbose("Path '\(uri)' did not match template '\(handler.template)': \(reason)")
+                logger.error("Path '\(uri)' did not match template '\(handler.template)': \(reason)")
                 continue
             } catch {
-                Log.verbose("Path '\(uri)' did not match template '\(handler.template)': \(error)")
+                logger.error("Path '\(uri)' did not match template '\(handler.template)': \(error)")
                 continue
             }
             
@@ -149,82 +152,6 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
         tokenizedHandlerMapping.append(tokenizedHandler)
         
         return true
-    }
-}
-
-extension HTTPMethod {
-    /// Returns the value of this HTTP method
-    var rawValue: String {
-        switch self {
-        case .GET:
-            return "GET"
-        case .PUT:
-            return "PUT"
-        case .ACL:
-            return "ACL"
-        case .HEAD:
-            return "HEAD"
-        case .POST:
-            return "POST"
-        case .COPY:
-            return "COPY"
-        case .LOCK:
-            return "LOCK"
-        case .MOVE:
-            return "MOVE"
-        case .BIND:
-            return "BIND"
-        case .LINK:
-            return "LINK"
-        case .PATCH:
-            return "PATCH"
-        case .TRACE:
-            return "TRACE"
-        case .MKCOL:
-            return "MKCOL"
-        case .MERGE:
-            return "MERGE"
-        case .PURGE:
-            return "PURGE"
-        case .NOTIFY:
-            return "NOTIFY"
-        case .SEARCH:
-            return "SEARCH"
-        case .UNLOCK:
-            return "UNLOCK"
-        case .REBIND:
-            return "REBIND"
-        case .UNBIND:
-            return "UNBIND"
-        case .REPORT:
-            return "REPORT"
-        case .DELETE:
-            return "DELETE"
-        case .UNLINK:
-            return "UNLINK"
-        case .CONNECT:
-            return "CONNECT"
-        case .MSEARCH:
-            return "MSEARCH"
-        case .OPTIONS:
-            return "OPTIONS"
-        case .PROPFIND:
-            return "PROPFIND"
-        case .CHECKOUT:
-            return "CHECKOUT"
-        case .PROPPATCH:
-            return "PROPPATCH"
-        case .SUBSCRIBE:
-            return "SUBSCRIBE"
-        case .MKCALENDAR:
-            return "MKCALENDAR"
-        case .MKACTIVITY:
-            return "MKACTIVITY"
-        case .UNSUBSCRIBE:
-            return "UNSUBSCRIBE"
-        case .RAW(let value):
-            return value
-        }
     }
 }
 

@@ -18,10 +18,13 @@
 import Foundation
 import SmokeOperations
 import SmokeHTTP1
-import LoggerAPI
 import HTTPPathCoding
 import HTTPHeadersCoding
 import QueryCoding
+import Logging
+
+private let logger = Logger(label:
+    "com.amazon.SmokeOperationsHTTP1.JSONPayloadHTTP1OperationDelegate")
 
 internal struct MimeTypes {
     static let json = "application/json"
@@ -128,7 +131,7 @@ public struct JSONPayloadHTTP1OperationDelegate: HTTP1OperationDelegate {
             do {
                 encodedOutput = try JSONEncoder.getFrameworkEncoder().encode(bodyEncodable)
             } catch {
-                Log.error("Serialization error: unable to encode response: \(error)")
+                logger.error("Serialization error: unable to encode response: \(error)")
                 
                 handleResponseForInternalServerError(requestHead: requestHead, responseHandler: responseHandler)
                 return
@@ -145,7 +148,7 @@ public struct JSONPayloadHTTP1OperationDelegate: HTTP1OperationDelegate {
             do {
                 headers = try HTTPHeadersEncoder().encode(additionalHeadersEncodable)
             } catch {
-                Log.error("Serialization error: unable to encode response: \(error)")
+                logger.error("Serialization error: unable to encode response: \(error)")
                 
                 handleResponseForInternalServerError(requestHead: requestHead, responseHandler: responseHandler)
                 return
@@ -220,7 +223,7 @@ public struct JSONPayloadHTTP1OperationDelegate: HTTP1OperationDelegate {
         do {
             encodedOutput = try operationFailure.error.encode(errorEncoder: JSONErrorEncoder())
         } catch {
-            Log.error("Serialization error: unable to encode response: \(error)")
+            logger.error("Serialization error: unable to encode response: \(error)")
             
             handleResponseForInternalServerError(requestHead: requestHead, responseHandler: responseHandler)
             return
