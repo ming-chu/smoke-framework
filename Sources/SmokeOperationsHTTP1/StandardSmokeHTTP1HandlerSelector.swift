@@ -156,7 +156,4 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
 }
 
 extension HTTPMethod: Hashable {
-    public var hashValue: Int {
-        return rawValue.hashValue
-    }
 }

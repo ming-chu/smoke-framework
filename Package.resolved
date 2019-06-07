@@ -6,7 +6,7 @@
         "repositoryURL": "https://github.com/amzn/smoke-http.git",
         "state": {
           "branch": "swift_5_nio_2",
-          "revision": "eb3909565f762991cdde6849d9f4f5d311a444ac",
+          "revision": "91078ccf3bc103098549518965fd31aaa3fec500",
           "version": null
         }
       },
@@ -16,6 +16,15 @@
         "state": {
           "branch": null,
           "revision": "f4240bf022a69815241a883c03645444b58ac553",
+          "version": "1.1.0"
+        }
+      },
+      {
+        "package": "swift-metrics",
+        "repositoryURL": "https://github.com/apple/swift-metrics.git",
+        "state": {
+          "branch": null,
+          "revision": "8e5110dcd6584ff5acfec40e31263a8d07cba783",
           "version": "1.1.0"
         }
       },

@@ -37,7 +37,7 @@ public extension SmokeHTTP1HandlerSelector {
             ErrorType: ErrorIdentifiableByDescription>(
         _ uri: String,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType, @escaping (SmokeResult<OutputType>) -> ()) throws -> ()),
+        operation: @escaping ((InputType, ContextType, @escaping (Result<OutputType, Swift.Error>) -> ()) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         inputLocation: OperationInputHTTPLocation,
         outputLocation: OperationOutputHTTPLocation) {
@@ -85,7 +85,7 @@ public extension SmokeHTTP1HandlerSelector {
             ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: HTTP1OperationDelegate>(
         _ uri: String,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType, @escaping (SmokeResult<OutputType>) -> ()) throws -> ()),
+        operation: @escaping ((InputType, ContextType, @escaping (Result<OutputType, Swift.Error>) -> ()) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         inputLocation: OperationInputHTTPLocation,
         outputLocation: OperationOutputHTTPLocation,
@@ -132,7 +132,7 @@ public extension SmokeHTTP1HandlerSelector {
             ErrorType: ErrorIdentifiableByDescription>(
         _ uri: String,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType, @escaping (SmokeResult<OutputType>) -> ()) throws -> ()),
+        operation: @escaping ((InputType, ContextType, @escaping (Result<OutputType, Swift.Error>) -> ()) throws -> ()),
         allowedErrors: [(ErrorType, Int)]) {
         
         let handler = OperationHandler(
@@ -160,7 +160,7 @@ public extension SmokeHTTP1HandlerSelector {
             ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: HTTP1OperationDelegate>(
         _ uri: String,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType, @escaping (SmokeResult<OutputType>) -> ()) throws -> ()),
+        operation: @escaping ((InputType, ContextType, @escaping (Result<OutputType, Swift.Error>) -> ()) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         operationDelegate: OperationDelegateType)
     where DefaultOperationDelegateType.RequestHeadType == OperationDelegateType.RequestHeadType,
