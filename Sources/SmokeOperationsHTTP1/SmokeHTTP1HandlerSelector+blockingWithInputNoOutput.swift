@@ -20,9 +20,6 @@ import SmokeOperations
 import NIOHTTP1
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SmokeOperationsHTTP1.SmokeHTTP1HandlerSelector+blockingWithInputNoOutput")
-
 public extension SmokeHTTP1HandlerSelector {
     /**
      Adds a handler for the specified uri and http method.
@@ -50,6 +47,7 @@ public extension SmokeHTTP1HandlerSelector {
         }
         
         let handler = OperationHandler(
+            uri: uri,
             inputProvider: inputProvider,
             operation: operation,
             allowedErrors: allowedErrors,
@@ -88,6 +86,7 @@ public extension SmokeHTTP1HandlerSelector {
             }
             
             let handler = OperationHandler(
+                uri: uri,
                 inputProvider: inputProvider,
                 operation: operation,
                 allowedErrors: allowedErrors,
@@ -113,6 +112,7 @@ public extension SmokeHTTP1HandlerSelector {
         allowedErrors: [(ErrorType, Int)]) {
         
         let handler = OperationHandler(
+            uri: uri,
             inputProvider: defaultOperationDelegate.getInputForOperation,
             operation: operation,
             allowedErrors: allowedErrors,
@@ -144,6 +144,7 @@ public extension SmokeHTTP1HandlerSelector {
     DefaultOperationDelegateType.ResponseHandlerType == OperationDelegateType.ResponseHandlerType {
         
         let handler = OperationHandler(
+            uri: uri,
             inputProvider: operationDelegate.getInputForOperation,
             operation: operation,
             allowedErrors: allowedErrors,

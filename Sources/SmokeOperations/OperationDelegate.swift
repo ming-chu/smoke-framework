@@ -16,6 +16,7 @@
 //
 
 import Foundation
+import Logging
 
 /**
  Delegate protocol for an operation that manages operation handling specific to
@@ -27,6 +28,9 @@ public protocol OperationDelegate {
     /// The type of response handler used with this delegate.
     associatedtype ResponseHandlerType
     
+     /// The `Logging.Logger` to use for logging for this invocation.
+    func getInvocationReportingForAnonymousRequest(requestLogger: Logger) -> SmokeInvocationReporting
+    
     /**
      Function to handle a successful operation with no response.
  
@@ -35,7 +39,8 @@ public protocol OperationDelegate {
           handle the response (such as requested response type).
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
-    func handleResponseForOperationWithNoOutput(requestHead: RequestHeadType, responseHandler: ResponseHandlerType)
+    func handleResponseForOperationWithNoOutput(requestHead: RequestHeadType, responseHandler: ResponseHandlerType,
+                                                invocationContext: SmokeInvocationContext)
     
     /**
      Function to handle an operation failure.
@@ -47,7 +52,7 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForOperationFailure(requestHead: RequestHeadType, operationFailure: OperationFailure,
-                                           responseHandler: ResponseHandlerType)
+                                           responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext)
     
     /**
      Function to handle an internal server error.
@@ -57,7 +62,8 @@ public protocol OperationDelegate {
           handle the response (such as requested response type).
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
-    func handleResponseForInternalServerError(requestHead: RequestHeadType, responseHandler: ResponseHandlerType)
+    func handleResponseForInternalServerError(requestHead: RequestHeadType, responseHandler: ResponseHandlerType,
+                                              invocationContext: SmokeInvocationContext)
     
     /**
      Function to handle an invalid operation being requested.
@@ -69,7 +75,7 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForInvalidOperation(requestHead: RequestHeadType, message: String,
-                                           responseHandler: ResponseHandlerType)
+                                           responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext)
     
     /**
      Function to handle a decoding error.
@@ -81,7 +87,7 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForDecodingError(requestHead: RequestHeadType, message: String,
-                                        responseHandler: ResponseHandlerType)
+                                        responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext)
     
     /**
      Function to handle a validation error.
@@ -93,5 +99,5 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForValidationError(requestHead: RequestHeadType, message: String?,
-                                          responseHandler: ResponseHandlerType)
+                                          responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext)
 }

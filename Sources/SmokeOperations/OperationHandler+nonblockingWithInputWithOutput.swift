@@ -18,9 +18,6 @@
 import Foundation
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SmokeOperations.OperationHandler+nonblockingWithInputWithOutput")
-
 public extension OperationHandler {
     /**
        Initializer for non-blocking operation handler that has input
@@ -37,10 +34,10 @@ public extension OperationHandler {
      */
     init<InputType: Validatable, OutputType: Validatable,
             ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: OperationDelegate>(
-            inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
+            uri: String, inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
             operation: @escaping ((InputType, ContextType, @escaping
                 (Result<OutputType, Swift.Error>) -> Void) throws -> Void),
-            outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType) -> Void),
+            outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeInvocationContext) -> Void),
             allowedErrors: [(ErrorType, Int)],
             operationDelegate: OperationDelegateType)
     where RequestHeadType == OperationDelegateType.RequestHeadType,
@@ -52,7 +49,7 @@ public extension OperationHandler {
          * provides an error, the responseHandler is called with that error.
          */
         let wrappedInputHandler = { (input: InputType, requestHead: RequestHeadType, context: ContextType,
-                                     responseHandler: ResponseHandlerType) in
+            responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext) in
             let handlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>?
             do {
                 try operation(input, context) { result in
@@ -77,7 +74,8 @@ public extension OperationHandler {
                         operationDelegate: operationDelegate,
                         requestHead: requestHead,
                         responseHandler: responseHandler,
-                        outputHandler: outputHandler)
+                        outputHandler: outputHandler,
+                        invocationContext: invocationContext)
                 }
                 
                 // no immediate result
@@ -97,11 +95,13 @@ public extension OperationHandler {
                     operationDelegate: operationDelegate,
                     requestHead: requestHead,
                     responseHandler: responseHandler,
-                    outputHandler: outputHandler)
+                    outputHandler: outputHandler,
+                    invocationContext: invocationContext)
             }
         }
         
-        self.init(inputHandler: wrappedInputHandler,
+        self.init(uri: uri,
+                  inputHandler: wrappedInputHandler,
                   inputProvider: inputProvider,
                   operationDelegate: operationDelegate)
     }

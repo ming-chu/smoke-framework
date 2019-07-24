@@ -22,9 +22,6 @@ import NIOExtras
 import SmokeOperations
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SmokeHTTP1.SmokeHTTP1Server")
-
 public struct ServerDefaults {
     static let defaultHost = "0.0.0.0"
     public static let defaultPort = 8080
@@ -47,6 +44,7 @@ public class SmokeHTTP1Server {
     let handler: HTTP1RequestHandler
     let invocationStrategy: InvocationStrategy
     var channel: Channel?
+    let defaultLogger: Logger
     let shutdownDispatchGroup: DispatchGroup
     let shutdownCompletionHandlerInvocationStrategy: InvocationStrategy
     
@@ -97,12 +95,14 @@ public class SmokeHTTP1Server {
     public init(handler: HTTP1RequestHandler,
                 port: Int = ServerDefaults.defaultPort,
                 invocationStrategy: InvocationStrategy = GlobalDispatchQueueAsyncInvocationStrategy(),
+                defaultLogger: Logger = Logger(label: "com.amazon.SmokeFramework.SmokeHTTP1.SmokeHTTP1Server"),
                 shutdownCompletionHandlerInvocationStrategy: InvocationStrategy = GlobalDispatchQueueSyncInvocationStrategy(),
                 eventLoopProvider: EventLoopProvider = .spawnNewThreads) {
         let signalQueue = DispatchQueue(label: "io.smokeframework.SmokeHTTP1Server.SignalHandlingQueue")
         
         self.port = port
         self.handler = handler
+        self.defaultLogger = defaultLogger
         self.invocationStrategy = invocationStrategy
         self.shutdownCompletionHandlerInvocationStrategy = shutdownCompletionHandlerInvocationStrategy
         
@@ -125,12 +125,12 @@ public class SmokeHTTP1Server {
         
         signalSource.setEventHandler { [unowned self] in
             self.signalSource.cancel()
-            logger.error("Received signal, initiating shutdown which should complete after the last request finished.")
+            defaultLogger.error("Received signal, initiating shutdown which should complete after the last request finished.")
 
             do {
                 try self.shutdown()
             } catch {
-                logger.error("Unable to shutdown server on signalSource: \(error)")
+                defaultLogger.error("Unable to shutdown server on signalSource: \(error)")
             }
         }
         signal(SIGINT, SIG_IGN)
@@ -143,7 +143,7 @@ public class SmokeHTTP1Server {
      either shutdown() is called or the surrounding application is being terminated.
      */
     public func start() throws {
-        logger.info("SmokeHTTP1Server starting on port \(port).")
+        defaultLogger.info("SmokeHTTP1Server starting on port \(port).")
         
         guard updateOnStart() else {
             // nothing to do; already started
@@ -189,13 +189,13 @@ public class SmokeHTTP1Server {
                 // release any waiters for shutdown
                 self.shutdownDispatchGroup.leave()
             } catch {
-                logger.error("Server unable to shutdown cleanly following full shutdown.")
+                self.defaultLogger.error("Server unable to shutdown cleanly following full shutdown.")
             }
             
-            logger.info("SmokeHTTP1Server shutdown.")
+            self.defaultLogger.info("SmokeHTTP1Server shutdown.")
         }
         
-        logger.info("SmokeHTTP1Server started on port \(port).")
+        defaultLogger.info("SmokeHTTP1Server started on port \(port).")
     }
     
     /**

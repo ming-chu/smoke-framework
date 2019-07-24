@@ -61,7 +61,8 @@ public protocol HTTP1OperationDelegate: OperationDelegate {
     func handleResponseForOperation<OutputType: OperationHTTP1OutputProtocol>(
         requestHead: RequestHeadType,
         output: OutputType,
-        responseHandler: ResponseHandlerType)
+        responseHandler: ResponseHandlerType,
+        invocationContext: SmokeInvocationContext)
     
     /**
      Function to handle a successful response from an operation.
@@ -75,5 +76,6 @@ public protocol HTTP1OperationDelegate: OperationDelegate {
     func handleResponseForOperation<OutputType: Encodable>(requestHead: RequestHeadType,
                                                            location: OperationOutputHTTPLocation,
                                                            output: OutputType,
-                                                           responseHandler: ResponseHandlerType)
+                                                           responseHandler: ResponseHandlerType,
+                                                           invocationContext: SmokeInvocationContext)
 }

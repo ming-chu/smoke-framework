@@ -18,9 +18,6 @@
 import Foundation
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SmokeOperations.OperationHandler+blockingWithInputWithOutput")
-
 public extension OperationHandler {
     /**
       Initializer for blocking operation handler that has input returns
@@ -37,9 +34,9 @@ public extension OperationHandler {
      */
     init<InputType: Validatable, OutputType: Validatable, ErrorType: ErrorIdentifiableByDescription,
         OperationDelegateType: OperationDelegate>(
-            inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
+            uri: String, inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
             operation: @escaping (InputType, ContextType) throws -> OutputType,
-            outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType) -> Void),
+            outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeInvocationContext) -> Void),
             allowedErrors: [(ErrorType, Int)],
             operationDelegate: OperationDelegateType)
     where RequestHeadType == OperationDelegateType.RequestHeadType,
@@ -51,7 +48,8 @@ public extension OperationHandler {
          * throws an error, the responseHandler is called with that error.
          */
         let wrappedInputHandler = { (input: InputType, requestHead: RequestHeadType, context: ContextType,
-                                     responseHandler: OperationDelegateType.ResponseHandlerType) in
+                                     responseHandler: OperationDelegateType.ResponseHandlerType,
+                                     invocationContext: SmokeInvocationContext) in
             let handlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>
             do {
                 let output = try operation(input, context)
@@ -70,10 +68,12 @@ public extension OperationHandler {
                 operationDelegate: operationDelegate,
                 requestHead: requestHead,
                 responseHandler: responseHandler,
-                outputHandler: outputHandler)
+                outputHandler: outputHandler,
+                invocationContext: invocationContext)
         }
         
-        self.init(inputHandler: wrappedInputHandler,
+        self.init(uri: uri,
+                  inputHandler: wrappedInputHandler,
                   inputProvider: inputProvider,
                   operationDelegate: operationDelegate)
     }

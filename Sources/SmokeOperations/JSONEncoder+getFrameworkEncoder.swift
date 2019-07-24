@@ -18,9 +18,6 @@
 import Foundation
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SwiftOperations.JSONEncoder+getFrameworkEncoder")
-
 private func createEncoder() -> JSONEncoder {
     let jsonEncoder = JSONEncoder()
     if #available(OSX 10.12, *) {
@@ -54,6 +51,7 @@ extension JSONEncoder {
      */
     public static func encodePayload<EncodableType: Encodable>(
         payload: EncodableType,
+        logger: Logger,
         reason: String? = nil) -> Data {
             let encodedError: Data
             

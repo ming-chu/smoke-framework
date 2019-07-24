@@ -22,9 +22,6 @@ import HTTPPathCoding
 import ShapeCoding
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SmokeOperationsHTTP1.StandardSmokeHTTP1HandlerSelector")
-
 /**
  Implementation of the SmokeHTTP1HandlerSelector protocol that selects a handler
  based on the case-insensitive uri and HTTP method of the incoming request.
@@ -57,12 +54,12 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
      - Parameters
         - requestHead: the request head of an incoming operation.
      */
-    public func getHandlerForOperation(_ uri: String, httpMethod: HTTPMethod) throws -> (SelectorOperationHandlerType, Shape) {
+    public func getHandlerForOperation(_ uri: String, httpMethod: HTTPMethod, requestLogger: Logger) throws -> (SelectorOperationHandlerType, Shape) {
         let lowerCasedUri = uri.lowercased()
         
         guard let handler = handlerMapping[lowerCasedUri]?[httpMethod] else {
             guard let tokenizedHandler = getTokenizedHandler(uri: uri,
-                                                             httpMethod: httpMethod) else {
+                                                             httpMethod: httpMethod, requestLogger: requestLogger) else {
                 throw SmokeOperationsError.invalidOperation(reason:
                     "Invalid operation with uri '\(lowerCasedUri)', method '\(httpMethod)'")
                 }
@@ -70,13 +67,14 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
                 return tokenizedHandler
         }
         
-        logger.info("Operation handler selected with uri '\(lowerCasedUri)', method '\(httpMethod)'")
+        requestLogger.info("Operation handler selected with uri '\(lowerCasedUri)', method '\(httpMethod)'")
         
         return (handler, .null)
     }
     
     private func getTokenizedHandler(uri: String,
-                                     httpMethod: HTTPMethod) -> (SelectorOperationHandlerType, Shape)? {
+                                     httpMethod: HTTPMethod,
+                                     requestLogger: Logger) -> (SelectorOperationHandlerType, Shape)? {
         let pathSegments = HTTPPathSegment.getPathSegmentsForPath(uri: uri)
         
         // iterate through each tokenized handler
@@ -90,10 +88,10 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
             do {
                 shape = try pathSegments.getShapeForTemplate(templateSegments: handler.templateSegments)
             } catch HTTPPathDecoderErrors.pathDoesNotMatchTemplate(let reason) {
-                logger.error("Path '\(uri)' did not match template '\(handler.template)': \(reason)")
+                requestLogger.error("Path '\(uri)' did not match template '\(handler.template)': \(reason)")
                 continue
             } catch {
-                logger.error("Path '\(uri)' did not match template '\(handler.template)': \(error)")
+                requestLogger.error("Path '\(uri)' did not match template '\(handler.template)': \(error)")
                 continue
             }
             

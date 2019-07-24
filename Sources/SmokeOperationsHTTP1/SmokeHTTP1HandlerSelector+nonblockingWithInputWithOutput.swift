@@ -20,9 +20,6 @@ import SmokeOperations
 import NIOHTTP1
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SmokeOperationsHTTP1.SmokeHTTP1HandlerSelector+nonblockingWithInputWithOutput")
-
 public extension SmokeHTTP1HandlerSelector {
     /**
      Adds a handler for the specified uri and http method.
@@ -53,14 +50,17 @@ public extension SmokeHTTP1HandlerSelector {
         
         func outputHandler(requestHead: DefaultOperationDelegateType.RequestHeadType,
                            output: OutputType,
-                           responseHandler: DefaultOperationDelegateType.ResponseHandlerType) {
+                           responseHandler: DefaultOperationDelegateType.ResponseHandlerType,
+                           invocationContext: SmokeInvocationContext) {
             delegateToUse.handleResponseForOperation(requestHead: requestHead,
                                                      location: outputLocation,
                                                      output: output,
-                                                     responseHandler: responseHandler)
+                                                     responseHandler: responseHandler,
+                                                     invocationContext: invocationContext)
         }
         
         let handler = OperationHandler(
+            uri: uri,
             inputProvider: inputProvider,
             operation: operation,
             outputHandler: outputHandler,
@@ -102,14 +102,17 @@ public extension SmokeHTTP1HandlerSelector {
             
             func outputHandler(requestHead: OperationDelegateType.RequestHeadType,
                                output: OutputType,
-                               responseHandler: OperationDelegateType.ResponseHandlerType) {
+                               responseHandler: OperationDelegateType.ResponseHandlerType,
+                               invocationContext: SmokeInvocationContext) {
                 operationDelegate.handleResponseForOperation(requestHead: requestHead,
                                                              location: outputLocation,
                                                              output: output,
-                                                             responseHandler: responseHandler)
+                                                             responseHandler: responseHandler,
+                                                             invocationContext: invocationContext)
             }
             
             let handler = OperationHandler(
+                uri: uri,
                 inputProvider: inputProvider,
                 operation: operation,
                 outputHandler: outputHandler,
@@ -136,6 +139,7 @@ public extension SmokeHTTP1HandlerSelector {
         allowedErrors: [(ErrorType, Int)]) {
         
         let handler = OperationHandler(
+            uri: uri,
             inputProvider: defaultOperationDelegate.getInputForOperation,
             operation: operation,
             outputHandler: defaultOperationDelegate.handleResponseForOperation,
@@ -167,6 +171,7 @@ public extension SmokeHTTP1HandlerSelector {
     DefaultOperationDelegateType.ResponseHandlerType == OperationDelegateType.ResponseHandlerType {
         
         let handler = OperationHandler(
+            uri: uri,
             inputProvider: operationDelegate.getInputForOperation,
             operation: operation,
             outputHandler: operationDelegate.handleResponseForOperation,

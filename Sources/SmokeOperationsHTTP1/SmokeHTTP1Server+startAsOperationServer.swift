@@ -20,9 +20,6 @@ import NIOHTTP1
 import SmokeOperations
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SmokeOperationsHTTP1.SmokeHTTP1Server+startAsOperationServer")
-
 public extension SmokeHTTP1Server {
     
     /**
@@ -48,6 +45,7 @@ public extension SmokeHTTP1Server {
         andContext context: ContextType,
         andPort port: Int = ServerDefaults.defaultPort,
         invocationStrategy: InvocationStrategy = GlobalDispatchQueueAsyncInvocationStrategy(),
+        defaultLogger: Logger = Logger(label: "com.amazon.SmokeFramework.SmokeHTTP1Server"),
         eventLoopProvider: EventLoopProvider = .spawnNewThreads) throws -> SmokeHTTP1Server
         where SelectorType: SmokeHTTP1HandlerSelector, SelectorType.ContextType == ContextType,
         SelectorType.DefaultOperationDelegateType.RequestHeadType == SmokeHTTP1RequestHead,
@@ -58,6 +56,7 @@ public extension SmokeHTTP1Server {
             let server = SmokeHTTP1Server(handler: handler,
                                           port: port,
                                           invocationStrategy: invocationStrategy,
+                                          defaultLogger: defaultLogger,
                                           eventLoopProvider: eventLoopProvider)
             
             try server.start()

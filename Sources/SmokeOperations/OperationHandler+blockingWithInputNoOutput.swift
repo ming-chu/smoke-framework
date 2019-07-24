@@ -18,9 +18,6 @@
 import Foundation
 import Logging
 
-private let logger = Logger(label:
-    "com.amazon.SmokeOperations.OperationHandler+blockingWithInputNoOutput")
-
 public extension OperationHandler {
     /**
        Initializer for blocking operation handler that has input returns
@@ -35,7 +32,7 @@ public extension OperationHandler {
           handling the operation.
      */
     init<InputType: Validatable, ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: OperationDelegate>(
-            inputProvider: @escaping (OperationDelegateType.RequestHeadType, Data?) throws -> InputType,
+            uri: String, inputProvider: @escaping (OperationDelegateType.RequestHeadType, Data?) throws -> InputType,
             operation: @escaping ((InputType, ContextType) throws -> ()),
             allowedErrors: [(ErrorType, Int)],
             operationDelegate: OperationDelegateType)
@@ -48,7 +45,7 @@ public extension OperationHandler {
          * throws an error, the responseHandler is called with that error.
          */
         let wrappedInputHandler = { (input: InputType, requestHead: RequestHeadType, context: ContextType,
-                                     responseHandler: ResponseHandlerType) in
+            responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext) in
             let handlerResult: NoOutputOperationHandlerResult<ErrorType>
             do {
                 try operation(input, context)
@@ -66,10 +63,12 @@ public extension OperationHandler {
                 handlerResult: handlerResult,
                 operationDelegate: operationDelegate,
                 requestHead: requestHead,
-                responseHandler: responseHandler)
+                responseHandler: responseHandler,
+                invocationContext: invocationContext)
         }
         
-        self.init(inputHandler: wrappedInputHandler,
+        self.init(uri: uri,
+                  inputHandler: wrappedInputHandler,
                   inputProvider: inputProvider,
                   operationDelegate: operationDelegate)
     }
