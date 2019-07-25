@@ -11,8 +11,8 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-// SmokeHTTP1HandlerSelector+blockingWithInputWithOutput.swift
-// SmokeOperationsHTTP1
+//  SmokeHTTP1HandlerSelector+nonblockingWithContextInputWithOutput.swift
+//  SmokeOperationsHTTP1
 //
 
 import Foundation
@@ -31,10 +31,10 @@ public extension SmokeHTTP1HandlerSelector {
           from the operation and their error codes.
      */
     mutating func addHandlerForOperation<InputType: ValidatableCodable, OutputType: ValidatableCodable,
-        ErrorType: ErrorIdentifiableByDescription>(
+            ErrorType: ErrorIdentifiableByDescription>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType) throws -> OutputType),
+        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting, @escaping (Result<OutputType, Swift.Error>) -> ()) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         inputLocation: OperationInputHTTPLocation,
         outputLocation: OperationOutputHTTPLocation) {
@@ -82,10 +82,10 @@ public extension SmokeHTTP1HandlerSelector {
           handling the operation.
      */
     mutating func addHandlerForOperation<InputType: ValidatableCodable, OutputType: ValidatableCodable,
-        ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: HTTP1OperationDelegate>(
+            ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: HTTP1OperationDelegate>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType) throws -> OutputType),
+        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting, @escaping (Result<OutputType, Swift.Error>) -> ()) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         inputLocation: OperationInputHTTPLocation,
         outputLocation: OperationOutputHTTPLocation,
@@ -131,12 +131,11 @@ public extension SmokeHTTP1HandlerSelector {
         - allowedErrors: the errors that can be serialized as responses
           from the operation and their error codes.
      */
-    mutating func addHandlerForOperation<InputType: ValidatableOperationHTTP1InputProtocol,
-        OutputType: ValidatableOperationHTTP1OutputProtocol,
-        ErrorType: ErrorIdentifiableByDescription>(
+    mutating func addHandlerForOperation<InputType: ValidatableOperationHTTP1InputProtocol, OutputType: ValidatableOperationHTTP1OutputProtocol,
+            ErrorType: ErrorIdentifiableByDescription>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType) throws -> OutputType),
+        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting, @escaping (Result<OutputType, Swift.Error>) -> ()) throws -> ()),
         allowedErrors: [(ErrorType, Int)]) {
         
         let handler = OperationHandler(
@@ -161,12 +160,11 @@ public extension SmokeHTTP1HandlerSelector {
         - operationDelegate: an operation-specific delegate to use when
           handling the operation.
      */
-    mutating func addHandlerForOperation<InputType: ValidatableOperationHTTP1InputProtocol,
-        OutputType: ValidatableOperationHTTP1OutputProtocol,
-        ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: HTTP1OperationDelegate>(
+    mutating func addHandlerForOperation<InputType: ValidatableOperationHTTP1InputProtocol, OutputType: ValidatableOperationHTTP1OutputProtocol,
+            ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: HTTP1OperationDelegate>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType) throws -> OutputType),
+        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting, @escaping (Result<OutputType, Swift.Error>) -> ()) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         operationDelegate: OperationDelegateType)
     where DefaultOperationDelegateType.RequestHeadType == OperationDelegateType.RequestHeadType,

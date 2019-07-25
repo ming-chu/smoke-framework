@@ -24,12 +24,16 @@ public protocol SmokeInvocationReporting {
 
     /// The `Logging.Logger` to use for logging for this invocation.
     var logger: Logging.Logger { get }
+    
+    var internalRequestId: String { get }
 }
 
 public struct StandardSmokeInvocationReporting: SmokeInvocationReporting {
     public let logger: Logger
+    public let internalRequestId: String
     
-    public init(logger: Logger) {
+    public init(logger: Logger, internalRequestId: String) {
         self.logger = logger
+        self.internalRequestId = internalRequestId
     }
 }

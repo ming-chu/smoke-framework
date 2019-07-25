@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  SmokeInvocationReportingSource.swift
+//  RequestLoggerDecorator.swift
 //  SmokeOperations
 //
 import Foundation
@@ -20,8 +20,8 @@ import Logging
 /**
  Defines that a `SmokeInvocationReporting` instance can be retrieved from conforming types.
  */
-public protocol SmokeInvocationReportingSource {
+public protocol RequestLoggerDecorator {
 
     /// The `Logging.Logger` to use for logging for this invocation.
-    func getInvocationReporting(requestLogger: Logger) -> SmokeInvocationReporting
+    func decorate(requestLogger: inout Logger)
 }

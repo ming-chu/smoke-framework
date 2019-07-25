@@ -34,7 +34,8 @@ public extension OperationHandler {
      */
     init<InputType: Validatable, OutputType: Validatable, ErrorType: ErrorIdentifiableByDescription,
         OperationDelegateType: OperationDelegate>(
-            uri: String, inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
+            serverName: String, operationIdentifer: OperationIdentifer, reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
+            inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
             operation: @escaping (InputType, ContextType) throws -> OutputType,
             outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeInvocationContext) -> Void),
             allowedErrors: [(ErrorType, Int)],
@@ -72,7 +73,7 @@ public extension OperationHandler {
                 invocationContext: invocationContext)
         }
         
-        self.init(uri: uri,
+        self.init(serverName: serverName, operationIdentifer: operationIdentifer, reportingConfiguration: reportingConfiguration,
                   inputHandler: wrappedInputHandler,
                   inputProvider: inputProvider,
                   operationDelegate: operationDelegate)

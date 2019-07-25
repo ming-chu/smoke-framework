@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-// OperationHandler+blockingWithInputNoOutput.swift
+// OperationHandler+blockingWithContextInputNoOutput.swift
 // SmokeOperations
 //
 
@@ -34,7 +34,7 @@ public extension OperationHandler {
     init<InputType: Validatable, ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: OperationDelegate>(
             serverName: String, operationIdentifer: OperationIdentifer, reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
             inputProvider: @escaping (OperationDelegateType.RequestHeadType, Data?) throws -> InputType,
-            operation: @escaping ((InputType, ContextType) throws -> ()),
+            operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> ()),
             allowedErrors: [(ErrorType, Int)],
             operationDelegate: OperationDelegateType)
     where RequestHeadType == OperationDelegateType.RequestHeadType,
@@ -49,7 +49,7 @@ public extension OperationHandler {
             responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext) in
             let handlerResult: NoOutputOperationHandlerResult<ErrorType>
             do {
-                try operation(input, context)
+                try operation(input, context, invocationContext.invocationReporting)
                 
                 handlerResult = .success
             } catch let smokeReturnableError as SmokeReturnableError {

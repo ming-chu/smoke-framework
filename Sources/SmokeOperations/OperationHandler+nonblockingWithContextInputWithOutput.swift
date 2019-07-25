@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  OperationHandler+nonblockingWithInputWithOutput.swift
+//  OperationHandler+nonblockingWithContextInputWithOutput.swift
 //  SmokeOperations
 //
 
@@ -36,7 +36,7 @@ public extension OperationHandler {
             ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: OperationDelegate>(
             serverName: String, operationIdentifer: OperationIdentifer, reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
             inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
-            operation: @escaping ((InputType, ContextType, @escaping
+            operation: @escaping ((InputType, ContextType, SmokeInvocationReporting, @escaping
                 (Result<OutputType, Swift.Error>) -> Void) throws -> Void),
             outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeInvocationContext) -> Void),
             allowedErrors: [(ErrorType, Int)],
@@ -53,7 +53,7 @@ public extension OperationHandler {
             responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext) in
             let handlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>?
             do {
-                try operation(input, context) { result in
+                try operation(input, context, invocationContext.invocationReporting) { result in
                     let asyncHandlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>
                     
                     switch result {

@@ -65,7 +65,7 @@ class HTTP1ChannelInboundHandler: ChannelInboundHandler {
     private let handler: HTTP1RequestHandler
     private let invocationStrategy: InvocationStrategy
     private var requestHead: HTTPRequestHead?
-    private var requestLogger: Logger?
+    private var requestAttributes: (Logger, String)?
     
     var partialBody: Data?
     private var keepAliveStatus = KeepAliveStatus()
@@ -79,21 +79,24 @@ class HTTP1ChannelInboundHandler: ChannelInboundHandler {
 
     private func reset() {
         requestHead = nil
-        requestLogger = nil
+        requestAttributes = nil
         partialBody = nil
         keepAliveStatus = KeepAliveStatus()
         state = State.idle
     }
     
-    private func getRequestLogger() -> Logger {
-        if let requestLogger = requestLogger {
-            return requestLogger
+    private func getRequestAttributes() -> (Logger, String) {
+        if let requestAttributes = requestAttributes {
+            return requestAttributes
         } else {
             let internalRequestId = UUID().uuidString
             var logger = Logger(label: "com.amazon.SmokeFramework.request.\(internalRequestId)")
             logger[metadataKey: "internalRequestId"] = "\(internalRequestId)"
             
-            return logger
+            let newRequestAttributes = (logger, internalRequestId)
+            requestAttributes = newRequestAttributes
+            
+            return newRequestAttributes
         }
     }
     
@@ -106,7 +109,7 @@ class HTTP1ChannelInboundHandler: ChannelInboundHandler {
         switch requestPart {
         case .head(let request):
             reset()
-            let logger = getRequestLogger()
+            let (logger, _) = getRequestAttributes()
             
             // if this is the request head, store it and the keep alive status
             requestHead = request
@@ -125,14 +128,15 @@ class HTTP1ChannelInboundHandler: ChannelInboundHandler {
                 partialBody = newData
             }
             
-            let logger = getRequestLogger()
+            let (logger, _) = getRequestAttributes()
             logger.debug("Request body part of \(byteBufferSize) bytes received.")
         case .end:
-            let logger = getRequestLogger()
+            let (logger, internalRequestId) = getRequestAttributes()
             logger.debug("Request end received.")
             // this signals that the head and all possible body parts have been received
             self.state.requestComplete()
-            handleCompleteRequest(context: context, bodyData: partialBody, logger: logger)
+            handleCompleteRequest(context: context, bodyData: partialBody,
+                                  logger: logger, internalRequestId: internalRequestId)
             reset()
         }
     }
@@ -141,7 +145,8 @@ class HTTP1ChannelInboundHandler: ChannelInboundHandler {
      Is called when the request has been completed received
      and can be passed to the request hander.
      */
-    func handleCompleteRequest(context: ChannelHandlerContext, bodyData: Data?, logger: Logger) {
+    func handleCompleteRequest(context: ChannelHandlerContext, bodyData: Data?,
+                               logger: Logger, internalRequestId: String) {
         self.state.responseComplete()
         
         logger.debug("Handling request body with \(bodyData?.count ?? 0) size.")
@@ -171,7 +176,8 @@ class HTTP1ChannelInboundHandler: ChannelInboundHandler {
                               body: bodyData,
                               responseHandler: responseHandler,
                               invocationStrategy: invocationStrategy,
-                              requestLogger: logger)
+                              requestLogger: logger,
+                              internalRequestId: internalRequestId)
     }
     
     /**

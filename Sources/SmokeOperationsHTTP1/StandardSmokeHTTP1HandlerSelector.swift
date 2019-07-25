@@ -26,12 +26,16 @@ import Logging
  Implementation of the SmokeHTTP1HandlerSelector protocol that selects a handler
  based on the case-insensitive uri and HTTP method of the incoming request.
  */
-public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDelegateType: HTTP1OperationDelegate>: SmokeHTTP1HandlerSelector {
+public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDelegateType: HTTP1OperationDelegate,
+        OperationIdentifer: OperationIdentity>: SmokeHTTP1HandlerSelector {
+    public let serverName: String
+    public let reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>
     public let defaultOperationDelegate: DefaultOperationDelegateType
     
     public typealias SelectorOperationHandlerType = OperationHandler<ContextType,
             DefaultOperationDelegateType.RequestHeadType,
-            DefaultOperationDelegateType.ResponseHandlerType>
+            DefaultOperationDelegateType.ResponseHandlerType,
+            OperationIdentifer>
     
     private struct TokenizedHandler {
         let template: String
@@ -43,8 +47,11 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
     private var handlerMapping: [String: [HTTPMethod: SelectorOperationHandlerType]] = [:]
     private var tokenizedHandlerMapping: [TokenizedHandler] = []
     
-    public init(defaultOperationDelegate: DefaultOperationDelegateType) {
+    public init(defaultOperationDelegate: DefaultOperationDelegateType, serverName: String = "Server",
+                reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer> = SmokeServerReportingConfiguration()) {
+        self.serverName = serverName
         self.defaultOperationDelegate = defaultOperationDelegate
+        self.reportingConfiguration = reportingConfiguration
     }
     
     /**
@@ -109,9 +116,11 @@ public struct StandardSmokeHTTP1HandlerSelector<ContextType, DefaultOperationDel
         - httpMethod: the http method to add the handler for.
         - handler: the handler to add.
      */
-    public mutating func addHandlerForUri(_ uri: String,
-                                          httpMethod: HTTPMethod,
-                                          handler: SelectorOperationHandlerType) {
+    public mutating func addHandlerForOperation(_ operationIdentifer: OperationIdentifer,
+                                                httpMethod: HTTPMethod,
+                                                handler: SelectorOperationHandlerType) {
+        let uri = operationIdentifer.operationPath
+        
         if addTokenizedUri(uri, httpMethod: httpMethod, handler: handler) {
             return
         }

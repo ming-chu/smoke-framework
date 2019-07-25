@@ -29,7 +29,7 @@ public protocol OperationDelegate {
     associatedtype ResponseHandlerType
     
      /// The `Logging.Logger` to use for logging for this invocation.
-    func getInvocationReportingForAnonymousRequest(requestLogger: Logger) -> SmokeInvocationReporting
+    func decorateLoggerForAnonymousRequest(requestLogger: inout Logger)
     
     /**
      Function to handle a successful operation with no response.

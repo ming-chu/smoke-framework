@@ -231,10 +231,11 @@ func verifyPathOutput<SelectorType>(uri: String, body: Data,
                                     additionalHeaders: [(String, String)] = []) -> OperationResponse
 where SelectorType: SmokeHTTP1HandlerSelector, SelectorType.ContextType == ExampleContext,
     SmokeHTTP1RequestHead == SelectorType.DefaultOperationDelegateType.RequestHeadType,
-    HTTP1ResponseHandler == SelectorType.DefaultOperationDelegateType.ResponseHandlerType {
-    let handler = OperationServerHTTP1RequestHandler<ExampleContext, SelectorType>(
+    HTTP1ResponseHandler == SelectorType.DefaultOperationDelegateType.ResponseHandlerType,
+    SelectorType.OperationIdentifer == TestOperations {
+    let handler = OperationServerHTTP1RequestHandler<ExampleContext, SelectorType, TestOperations>(
         handlerSelector: handlerSelector,
-        context: ExampleContext())
+        context: ExampleContext(), serverName: "Server", reportingConfiguration: SmokeServerReportingConfiguration<TestOperations>())
     
     var httpRequestHead = HTTPRequestHead(version: HTTPVersion(major: 1, minor: 1),
                                           method: .POST,
@@ -247,7 +248,8 @@ where SelectorType: SmokeHTTP1HandlerSelector, SelectorType.ContextType == Examp
     
     handler.handle(requestHead: httpRequestHead, body: body,
                    responseHandler: responseHandler,
-                   invocationStrategy: TestInvocationStrategy(), requestLogger: Logger(label: "Test"))
+                   invocationStrategy: TestInvocationStrategy(), requestLogger: Logger(label: "Test"),
+                   internalRequestId: "internalRequestId")
     
     return responseHandler.response!
 }
@@ -257,7 +259,8 @@ func verifyErrorResponse<SelectorType>(uri: String,
                                        additionalHeaders: [(String, String)] = []) throws
 where SelectorType: SmokeHTTP1HandlerSelector, SelectorType.ContextType == ExampleContext,
     SmokeHTTP1RequestHead == SelectorType.DefaultOperationDelegateType.RequestHeadType,
-    HTTP1ResponseHandler == SelectorType.DefaultOperationDelegateType.ResponseHandlerType {
+    HTTP1ResponseHandler == SelectorType.DefaultOperationDelegateType.ResponseHandlerType,
+    SelectorType.OperationIdentifer == TestOperations {
     let response = verifyPathOutput(uri: uri,
                                     body: serializedAlternateInput.data(using: .utf8)!,
                                     handlerSelector: handlerSelector,

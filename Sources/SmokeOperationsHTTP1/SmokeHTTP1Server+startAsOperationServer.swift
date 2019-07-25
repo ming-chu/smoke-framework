@@ -40,19 +40,22 @@ public extension SmokeHTTP1Server {
                               with the number of threads specified by `System.coreCount`.
      - Returns: the SmokeHTTP1Server that was created and started.
      */
-    static func startAsOperationServer<ContextType, SelectorType>(
+    static func startAsOperationServer<ContextType, SelectorType, OperationIdentifer>(
         withHandlerSelector handlerSelector: SelectorType,
         andContext context: ContextType,
         andPort port: Int = ServerDefaults.defaultPort,
+        serverName: String = "Server",
         invocationStrategy: InvocationStrategy = GlobalDispatchQueueAsyncInvocationStrategy(),
         defaultLogger: Logger = Logger(label: "com.amazon.SmokeFramework.SmokeHTTP1Server"),
+        reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer> = SmokeServerReportingConfiguration(),
         eventLoopProvider: EventLoopProvider = .spawnNewThreads) throws -> SmokeHTTP1Server
         where SelectorType: SmokeHTTP1HandlerSelector, SelectorType.ContextType == ContextType,
         SelectorType.DefaultOperationDelegateType.RequestHeadType == SmokeHTTP1RequestHead,
-        SelectorType.DefaultOperationDelegateType.ResponseHandlerType == HTTP1ResponseHandler {
+        SelectorType.DefaultOperationDelegateType.ResponseHandlerType == HTTP1ResponseHandler,
+        SelectorType.OperationIdentifer == OperationIdentifer {
             let handler = OperationServerHTTP1RequestHandler(
                 handlerSelector: handlerSelector,
-                context: context)
+                context: context, serverName: serverName, reportingConfiguration: reportingConfiguration)
             let server = SmokeHTTP1Server(handler: handler,
                                           port: port,
                                           invocationStrategy: invocationStrategy,

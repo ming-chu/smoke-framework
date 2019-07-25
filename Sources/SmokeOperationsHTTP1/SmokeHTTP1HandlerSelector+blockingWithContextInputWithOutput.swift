@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-// SmokeHTTP1HandlerSelector+blockingWithInputWithOutput.swift
+// SmokeHTTP1HandlerSelector+blockingWithContextInputWithOutput.swift
 // SmokeOperationsHTTP1
 //
 
@@ -34,7 +34,7 @@ public extension SmokeHTTP1HandlerSelector {
         ErrorType: ErrorIdentifiableByDescription>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType) throws -> OutputType),
+        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> OutputType),
         allowedErrors: [(ErrorType, Int)],
         inputLocation: OperationInputHTTPLocation,
         outputLocation: OperationOutputHTTPLocation) {
@@ -85,7 +85,7 @@ public extension SmokeHTTP1HandlerSelector {
         ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: HTTP1OperationDelegate>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType) throws -> OutputType),
+        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> OutputType),
         allowedErrors: [(ErrorType, Int)],
         inputLocation: OperationInputHTTPLocation,
         outputLocation: OperationOutputHTTPLocation,
@@ -136,7 +136,7 @@ public extension SmokeHTTP1HandlerSelector {
         ErrorType: ErrorIdentifiableByDescription>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType) throws -> OutputType),
+        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> OutputType),
         allowedErrors: [(ErrorType, Int)]) {
         
         let handler = OperationHandler(
@@ -166,7 +166,7 @@ public extension SmokeHTTP1HandlerSelector {
         ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: HTTP1OperationDelegate>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType) throws -> OutputType),
+        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> OutputType),
         allowedErrors: [(ErrorType, Int)],
         operationDelegate: OperationDelegateType)
     where DefaultOperationDelegateType.RequestHeadType == OperationDelegateType.RequestHeadType,

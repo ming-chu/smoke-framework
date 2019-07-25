@@ -35,5 +35,5 @@ public protocol HTTP1RequestHandler {
         - invocationStrategy: the invocationStrategy to use for this request.
      */
     func handle(requestHead: HTTPRequestHead, body: Data?, responseHandler: HTTP1ResponseHandler,
-                invocationStrategy: InvocationStrategy, requestLogger: Logger)
+                invocationStrategy: InvocationStrategy, requestLogger: Logger, internalRequestId: String)
 }

@@ -27,9 +27,13 @@ import Logging
 public protocol SmokeHTTP1HandlerSelector {
     associatedtype ContextType
     associatedtype DefaultOperationDelegateType: HTTP1OperationDelegate
+    associatedtype OperationIdentifer: OperationIdentity
     
     /// Get the instance of the Default OperationDelegate type
     var defaultOperationDelegate: DefaultOperationDelegateType { get }
+    
+    var serverName: String { get }
+    var reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer> { get }
     
     /**
      Gets the handler to use for an operation with the provided http request
@@ -41,7 +45,8 @@ public protocol SmokeHTTP1HandlerSelector {
     func getHandlerForOperation(_ uri: String, httpMethod: HTTPMethod, requestLogger: Logger) throws
         -> (OperationHandler<ContextType,
             DefaultOperationDelegateType.RequestHeadType,
-            DefaultOperationDelegateType.ResponseHandlerType>, Shape)
+            DefaultOperationDelegateType.ResponseHandlerType,
+            OperationIdentifer>, Shape)
     
     /**
      Adds a handler for the specified uri and http method.
@@ -51,9 +56,10 @@ public protocol SmokeHTTP1HandlerSelector {
         - httpMethod: the http method to add the handler for.
         - handler: the handler to add.
      */
-    mutating func addHandlerForUri(_ uri: String,
-                                   httpMethod: HTTPMethod,
-                                   handler: OperationHandler<ContextType,
-                                    DefaultOperationDelegateType.RequestHeadType,
-                                    DefaultOperationDelegateType.ResponseHandlerType>)
+    mutating func addHandlerForOperation(_ operationIdentifer: OperationIdentifer,
+                                         httpMethod: HTTPMethod,
+                                         handler: OperationHandler<ContextType,
+                                            DefaultOperationDelegateType.RequestHeadType,
+                                            DefaultOperationDelegateType.ResponseHandlerType,
+                                            OperationIdentifer>)
 }

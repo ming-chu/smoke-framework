@@ -32,7 +32,8 @@ public extension OperationHandler {
           handling the operation.
      */
     init<InputType: Validatable, ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: OperationDelegate>(
-            uri: String, inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
+            serverName: String, operationIdentifer: OperationIdentifer, reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
+            inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
             operation: @escaping ((InputType, ContextType, @escaping (Swift.Error?) -> ()) throws -> ()),
             allowedErrors: [(ErrorType, Int)],
             operationDelegate: OperationDelegateType)
@@ -93,7 +94,7 @@ public extension OperationHandler {
             }
         }
         
-        self.init(uri: uri,
+        self.init(serverName: serverName, operationIdentifer: operationIdentifer, reportingConfiguration: reportingConfiguration,
                   inputHandler: wrappedInputHandler,
                   inputProvider: inputProvider,
                   operationDelegate: operationDelegate)

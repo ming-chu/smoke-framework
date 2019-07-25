@@ -103,7 +103,7 @@ public typealias HandlerSelectorType =
 public func createHandlerSelector() -> HandlerSelectorType {
     var newHandler = HandlerSelectorType(defaultOperationDelegate: JSONPayloadHTTP1OperationDelegate())
     
-    newHandler.addHandlerForUri("/theOperationPath", httpMethod: .POST,
+    newHandler.addHandlerForOperation("/theOperationPath", httpMethod: .POST,
                                 operation: handleTheOperation,
                                 allowedErrors: [(MyApplicationErrors.unknownResource, 400)])
 
@@ -179,7 +179,7 @@ The Smoke Framework provides the `JSONPayloadHTTP1OperationDelegate` implementat
 a JSON encoded request body as the handler's input and returns the output as the JSON encoded
 response body.
 
-Each `addHandlerForUri` invocation can optionally accept an operation delegate to use when that
+Each `addHandlerForOperation` invocation can optionally accept an operation delegate to use when that
 handler is selected. This can be used when operations have specific encoding or decoding requirements.
 A default operation delegate is set up at server startup to be used for operations without a specific
 handler or when no handler matches a request.
@@ -230,7 +230,7 @@ public typealias SmokeReturnableError = ErrorIdentifiableByDescription & Encodab
 ```  
 
 Errors can be explicitly encoded and returned to the caller by conforming to the `Swift.Error`, `CustomStringConvertible`
-and `Encodable` protocols **and** being specified under *allowedErrors* in the `addHandlerForUri` call setting up the
+and `Encodable` protocols **and** being specified under *allowedErrors* in the `addHandlerForOperation` call setting up the
 operation handler. For example-
 
 ```swift

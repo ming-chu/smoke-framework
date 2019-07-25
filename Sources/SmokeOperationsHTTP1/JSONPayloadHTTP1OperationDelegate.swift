@@ -43,8 +43,8 @@ public struct JSONPayloadHTTP1OperationDelegate: HTTP1OperationDelegate {
         
     }
     
-    public func getInvocationReportingForAnonymousRequest(requestLogger: Logger) -> SmokeInvocationReporting {
-        return StandardSmokeInvocationReporting(logger: requestLogger)
+    public func decorateLoggerForAnonymousRequest(requestLogger: inout Logger) {
+        // nothing to do
     }
     
     public func getInputForOperation<InputType: OperationHTTP1InputProtocol>(requestHead: SmokeHTTP1RequestHead,
