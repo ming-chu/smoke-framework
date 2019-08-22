@@ -25,14 +25,14 @@ import Logging
 public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType, OperationIdentifer: OperationIdentity> {
     public typealias OperationResultValidatableInputFunction<InputType: Validatable>
         = (_ input: InputType, _ requestHead: RequestHeadType, _ context: ContextType,
-        _ responseHandler: ResponseHandlerType, _ invocationContext: SmokeInvocationContext) -> ()
+        _ responseHandler: ResponseHandlerType, _ invocationContext: SmokeServerInvocationContext) -> ()
     public typealias OperationResultDataInputFunction
         = (_ requestHead: RequestHeadType, _ body: Data?, _ context: ContextType,
         _ responseHandler: ResponseHandlerType, _ invocationStrategy: InvocationStrategy,
         _ requestLogger: Logger, _ internalRequestId: String) -> ()
     
     private let operationFunction: OperationResultDataInputFunction
-    private let requestReporting: SmokeRequestReporting
+    private let requestReporting: SmokeServerRequestReporting
     
     /**
      * Handle for an operation handler delegates the input to the wrapped handling function
@@ -46,8 +46,8 @@ public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType
     }
     
     private enum InputDecodeResult<InputType: Validatable> {
-        case ok(input: InputType, inputHandler: OperationResultValidatableInputFunction<InputType>, invocationContext: SmokeInvocationContext)
-        case error(description: String, reportableType: String?, invocationContext: SmokeInvocationContext)
+        case ok(input: InputType, inputHandler: OperationResultValidatableInputFunction<InputType>, invocationContext: SmokeServerInvocationContext)
+        case error(description: String, reportableType: String?, invocationContext: SmokeServerInvocationContext)
         
         func handle<OperationDelegateType: OperationDelegate>(
                 requestHead: RequestHeadType, context: ContextType,
@@ -108,8 +108,8 @@ public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType
     public init(serverName: String, operationIdentifer: OperationIdentifer, reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
                 operationFunction: @escaping OperationResultDataInputFunction) {
         self.operationFunction = operationFunction
-        self.requestReporting = StandardSmokeRequestReporting(serverName: serverName, request: .serverOperation(operationIdentifer),
-                                                              configuration: reportingConfiguration)
+        self.requestReporting = SmokeServerRequestReporting(serverName: serverName, request: .serverOperation(operationIdentifer),
+                                                            configuration: reportingConfiguration)
     }
     
     /**
@@ -122,18 +122,18 @@ public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType
         operationDelegate: OperationDelegateType)
     where RequestHeadType == OperationDelegateType.RequestHeadType,
     ResponseHandlerType == OperationDelegateType.ResponseHandlerType {
-        let newRequestReporting = StandardSmokeRequestReporting(serverName: serverName, request: .serverOperation(operationIdentifer),
-                                                                configuration: reportingConfiguration)
+        let newRequestReporting = SmokeServerRequestReporting(serverName: serverName, request: .serverOperation(operationIdentifer),
+                                                              configuration: reportingConfiguration)
         
         func getInvocationContextForAnonymousRequest(requestLogger: Logger,
-                                                     internalRequestId: String) -> SmokeInvocationContext {
+                                                     internalRequestId: String) -> SmokeServerInvocationContext {
             var decoratedRequestLogger: Logger = requestLogger
             operationDelegate.decorateLoggerForAnonymousRequest(requestLogger: &decoratedRequestLogger)
             
-            let invocationReporting = StandardSmokeInvocationReporting(logger: decoratedRequestLogger,
-                                                                       internalRequestId: internalRequestId)
-            return SmokeInvocationContext(invocationReporting: invocationReporting,
-                                          requestReporting: newRequestReporting)
+            let invocationReporting = SmokeServerInvocationReporting(logger: decoratedRequestLogger,
+                                                                     internalRequestId: internalRequestId)
+            return SmokeServerInvocationContext(invocationReporting: invocationReporting,
+                                                requestReporting: newRequestReporting)
         }
         
         let newFunction: OperationResultDataInputFunction = { (requestHead, body, context, responseHandler,
@@ -150,10 +150,10 @@ public struct OperationHandler<ContextType, RequestHeadType, ResponseHandlerType
                     requestLoggerDecorator.decorate(requestLogger: &decoratedRequestLogger)
                 }
                 
-                let invocationReporting = StandardSmokeInvocationReporting(logger: decoratedRequestLogger,
-                                                                           internalRequestId: internalRequestId)
-                let invocationContext = SmokeInvocationContext(invocationReporting: invocationReporting,
-                                                               requestReporting: newRequestReporting)
+                let invocationReporting = SmokeServerInvocationReporting(logger: decoratedRequestLogger,
+                                                                         internalRequestId: internalRequestId)
+                let invocationContext = SmokeServerInvocationContext(invocationReporting: invocationReporting,
+                                                                     requestReporting: newRequestReporting)
                 
                 inputDecodeResult = .ok(input: input, inputHandler: inputHandler, invocationContext: invocationContext)
             } catch DecodingError.keyNotFound(_, let context) {

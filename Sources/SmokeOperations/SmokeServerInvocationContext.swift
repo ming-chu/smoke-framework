@@ -11,17 +11,17 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  SmokeInvocationContext.swift
+//  SmokeServerInvocationReporting.swift
 //  SmokeOperations
 //
 import Foundation
 
-public struct SmokeInvocationContext {
-    public let invocationReporting: SmokeInvocationReporting
-    public let requestReporting: SmokeRequestReporting
+public struct SmokeServerInvocationContext {
+    public let invocationReporting: SmokeServerInvocationReporting
+    public let requestReporting: SmokeServerRequestReporting
     
-    public init(invocationReporting: SmokeInvocationReporting,
-                requestReporting: SmokeRequestReporting) {
+    public init(invocationReporting: SmokeServerInvocationReporting,
+                requestReporting: SmokeServerRequestReporting) {
         self.invocationReporting = invocationReporting
         self.requestReporting = requestReporting
     }

@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  SmokeInvocationReporting.swift
+//  SmokeServerInvocationReporting.swift
 //  SmokeOperations
 //
 import Foundation
@@ -20,15 +20,7 @@ import Logging
 /**
  A context related to reporting on the invocation of the SmokeFramework.
  */
-public protocol SmokeInvocationReporting {
-
-    /// The `Logging.Logger` to use for logging for this invocation.
-    var logger: Logging.Logger { get }
-    
-    var internalRequestId: String { get }
-}
-
-public struct StandardSmokeInvocationReporting: SmokeInvocationReporting {
+public struct SmokeServerInvocationReporting {
     public let logger: Logger
     public let internalRequestId: String
     

@@ -40,7 +40,7 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForOperationWithNoOutput(requestHead: RequestHeadType, responseHandler: ResponseHandlerType,
-                                                invocationContext: SmokeInvocationContext)
+                                                invocationContext: SmokeServerInvocationContext)
     
     /**
      Function to handle an operation failure.
@@ -52,7 +52,7 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForOperationFailure(requestHead: RequestHeadType, operationFailure: OperationFailure,
-                                           responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext)
+                                           responseHandler: ResponseHandlerType, invocationContext: SmokeServerInvocationContext)
     
     /**
      Function to handle an internal server error.
@@ -63,7 +63,7 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForInternalServerError(requestHead: RequestHeadType, responseHandler: ResponseHandlerType,
-                                              invocationContext: SmokeInvocationContext)
+                                              invocationContext: SmokeServerInvocationContext)
     
     /**
      Function to handle an invalid operation being requested.
@@ -75,7 +75,7 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForInvalidOperation(requestHead: RequestHeadType, message: String,
-                                           responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext)
+                                           responseHandler: ResponseHandlerType, invocationContext: SmokeServerInvocationContext)
     
     /**
      Function to handle a decoding error.
@@ -87,7 +87,7 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForDecodingError(requestHead: RequestHeadType, message: String,
-                                        responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext)
+                                        responseHandler: ResponseHandlerType, invocationContext: SmokeServerInvocationContext)
     
     /**
      Function to handle a validation error.
@@ -99,5 +99,5 @@ public protocol OperationDelegate {
         - responseHander: typically a response handler specific to the transport protocol being used.
      */
     func handleResponseForValidationError(requestHead: RequestHeadType, message: String?,
-                                          responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext)
+                                          responseHandler: ResponseHandlerType, invocationContext: SmokeServerInvocationContext)
 }

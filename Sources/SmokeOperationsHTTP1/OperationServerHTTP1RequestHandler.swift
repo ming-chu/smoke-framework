@@ -37,34 +37,34 @@ struct OperationServerHTTP1RequestHandler<ContextType, SelectorType, OperationId
         SelectorType.OperationIdentifer == OperationIdentifer {
     let handlerSelector: SelectorType
     let context: ContextType
-    let pingRequestReporting: StandardSmokeRequestReporting<OperationIdentifer>
-    let unknownOperationRequestReporting: StandardSmokeRequestReporting<OperationIdentifer>
-    let errorDeterminingOperationRequestReporting: StandardSmokeRequestReporting<OperationIdentifer>
+    let pingRequestReporting: SmokeServerRequestReporting
+    let unknownOperationRequestReporting: SmokeServerRequestReporting
+    let errorDeterminingOperationRequestReporting: SmokeServerRequestReporting
     
     init(handlerSelector: SelectorType, context: ContextType, serverName: String,
          reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>) {
         self.handlerSelector = handlerSelector
         self.context = context
         
-        self.pingRequestReporting = StandardSmokeRequestReporting(serverName: serverName, request: .ping,
-                                                                  configuration: reportingConfiguration)
-        self.unknownOperationRequestReporting = StandardSmokeRequestReporting(serverName: serverName, request: .unknownOperation,
-                                                                              configuration: reportingConfiguration)
-        self.errorDeterminingOperationRequestReporting = StandardSmokeRequestReporting(serverName: serverName,
-                                                                                       request: .errorDeterminingOperation,
-                                                                                       configuration: reportingConfiguration)
+        self.pingRequestReporting = SmokeServerRequestReporting(serverName: serverName, request: .ping,
+                                                                configuration: reportingConfiguration)
+        self.unknownOperationRequestReporting = SmokeServerRequestReporting(serverName: serverName, request: .unknownOperation,
+                                                                            configuration: reportingConfiguration)
+        self.errorDeterminingOperationRequestReporting = SmokeServerRequestReporting(serverName: serverName,
+                                                                                     request: .errorDeterminingOperation,
+                                                                                     configuration: reportingConfiguration)
     }
 
     public func handle(requestHead: HTTPRequestHead, body: Data?, responseHandler: HTTP1ResponseHandler,
                        invocationStrategy: InvocationStrategy, requestLogger: Logger, internalRequestId: String) {
-        func getInvocationContextForAnonymousRequest(requestReporting: SmokeRequestReporting) -> SmokeInvocationContext {
+        func getInvocationContextForAnonymousRequest(requestReporting: SmokeServerRequestReporting) -> SmokeServerInvocationContext {
             var decoratedRequestLogger: Logger = requestLogger
             handlerSelector.defaultOperationDelegate.decorateLoggerForAnonymousRequest(requestLogger: &decoratedRequestLogger)
             
-            let invocationReporting = StandardSmokeInvocationReporting(logger: decoratedRequestLogger,
-                                                                       internalRequestId: internalRequestId)
-            return SmokeInvocationContext(invocationReporting: invocationReporting,
-                                          requestReporting: requestReporting)
+            let invocationReporting = SmokeServerInvocationReporting(logger: decoratedRequestLogger,
+                                                                     internalRequestId: internalRequestId)
+            return SmokeServerInvocationContext(invocationReporting: invocationReporting,
+                                                requestReporting: requestReporting)
         }
         
         // this is the ping url

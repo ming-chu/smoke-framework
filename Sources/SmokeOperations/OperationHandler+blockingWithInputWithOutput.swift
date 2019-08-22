@@ -37,7 +37,7 @@ public extension OperationHandler {
             serverName: String, operationIdentifer: OperationIdentifer, reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
             inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
             operation: @escaping (InputType, ContextType) throws -> OutputType,
-            outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeInvocationContext) -> Void),
+            outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeServerInvocationContext) -> Void),
             allowedErrors: [(ErrorType, Int)],
             operationDelegate: OperationDelegateType)
     where RequestHeadType == OperationDelegateType.RequestHeadType,
@@ -50,7 +50,7 @@ public extension OperationHandler {
          */
         let wrappedInputHandler = { (input: InputType, requestHead: RequestHeadType, context: ContextType,
                                      responseHandler: OperationDelegateType.ResponseHandlerType,
-                                     invocationContext: SmokeInvocationContext) in
+                                     invocationContext: SmokeServerInvocationContext) in
             let handlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>
             do {
                 let output = try operation(input, context)

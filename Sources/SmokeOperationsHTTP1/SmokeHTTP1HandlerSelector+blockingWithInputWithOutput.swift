@@ -51,7 +51,7 @@ public extension SmokeHTTP1HandlerSelector {
         func outputHandler(requestHead: DefaultOperationDelegateType.RequestHeadType,
                            output: OutputType,
                            responseHandler: DefaultOperationDelegateType.ResponseHandlerType,
-                           invocationContext: SmokeInvocationContext) {
+                           invocationContext: SmokeServerInvocationContext) {
             delegateToUse.handleResponseForOperation(requestHead: requestHead,
                                                      location: outputLocation,
                                                      output: output,
@@ -103,7 +103,7 @@ public extension SmokeHTTP1HandlerSelector {
             func outputHandler(requestHead: OperationDelegateType.RequestHeadType,
                                output: OutputType,
                                responseHandler: OperationDelegateType.ResponseHandlerType,
-                               invocationContext: SmokeInvocationContext) {
+                               invocationContext: SmokeServerInvocationContext) {
                 operationDelegate.handleResponseForOperation(requestHead: requestHead,
                                                              location: outputLocation,
                                                              output: output,

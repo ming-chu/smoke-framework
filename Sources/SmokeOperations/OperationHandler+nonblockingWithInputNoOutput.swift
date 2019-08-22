@@ -46,7 +46,7 @@ public extension OperationHandler {
          * provides an error, the responseHandler is called with that error.
          */
         let wrappedInputHandler = { (input: InputType, requestHead: RequestHeadType, context: ContextType,
-            responseHandler: ResponseHandlerType, invocationContext: SmokeInvocationContext) in
+            responseHandler: ResponseHandlerType, invocationContext: SmokeServerInvocationContext) in
             let handlerResult: NoOutputOperationHandlerResult<ErrorType>?
             do {
                 try operation(input, context) { error in

@@ -86,7 +86,7 @@ public extension OperationHandler {
         operationDelegate: OperationDelegateType,
         requestHead: OperationDelegateType.RequestHeadType,
         responseHandler: OperationDelegateType.ResponseHandlerType,
-        invocationContext: SmokeInvocationContext)
+        invocationContext: SmokeServerInvocationContext)
     where RequestHeadType == OperationDelegateType.RequestHeadType,
     ResponseHandlerType == OperationDelegateType.ResponseHandlerType {
             let logger = invocationContext.invocationReporting.logger
@@ -145,8 +145,8 @@ public extension OperationHandler {
         operationDelegate: OperationDelegateType,
         requestHead: RequestHeadType,
         responseHandler: ResponseHandlerType,
-        outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeInvocationContext) -> Void),
-        invocationContext: SmokeInvocationContext)
+        outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeServerInvocationContext) -> Void),
+        invocationContext: SmokeServerInvocationContext)
     where RequestHeadType == OperationDelegateType.RequestHeadType,
     ResponseHandlerType == OperationDelegateType.ResponseHandlerType {
             let logger = invocationContext.invocationReporting.logger

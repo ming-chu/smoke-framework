@@ -51,23 +51,23 @@ struct OperationResponse {
 class TestHttpResponseHandler: HTTP1ResponseHandler {
     var response: OperationResponse?
     
-    func complete(invocationContext: SmokeInvocationContext, status: HTTPResponseStatus,
+    func complete(invocationContext: SmokeServerInvocationContext, status: HTTPResponseStatus,
                   responseComponents: HTTP1ServerResponseComponents) {
         response = OperationResponse(status: status,
                                      responseComponents: responseComponents)
     }
     
-    func completeInEventLoop(invocationContext: SmokeInvocationContext, status: HTTPResponseStatus,
+    func completeInEventLoop(invocationContext: SmokeServerInvocationContext, status: HTTPResponseStatus,
                              responseComponents: HTTP1ServerResponseComponents) {
         complete(invocationContext: invocationContext, status: status, responseComponents: responseComponents)
     }
     
-    func completeSilentlyInEventLoop(invocationContext: SmokeInvocationContext, status: HTTPResponseStatus,
+    func completeSilentlyInEventLoop(invocationContext: SmokeServerInvocationContext, status: HTTPResponseStatus,
                                      responseComponents: HTTP1ServerResponseComponents) {
         complete(invocationContext: invocationContext, status: status, responseComponents: responseComponents)
     }
     
-    func executeInEventLoop(invocationContext: SmokeInvocationContext, execute: @escaping () -> ()) {
+    func executeInEventLoop(invocationContext: SmokeServerInvocationContext, execute: @escaping () -> ()) {
         execute()
     }
 }

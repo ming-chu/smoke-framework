@@ -18,7 +18,7 @@ import Foundation
 import Logging
 
 /**
- Defines that a `SmokeInvocationReporting` instance can be retrieved from conforming types.
+ Defines that a `SmokeServerInvocationReporting` instance can be retrieved from conforming types.
  */
 public protocol RequestLoggerDecorator {
 

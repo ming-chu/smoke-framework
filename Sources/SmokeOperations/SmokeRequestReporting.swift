@@ -21,22 +21,7 @@ import Metrics
 /**
  A context related to reporting on the invocation of a SmokeServer operation.
  */
-public protocol SmokeRequestReporting {
-    
-    /// The `Metrics.Counter` to record the success of this invocation.
-    var successCounter: Metrics.Counter? { get }
-    
-    /// The `Metrics.Counter` to record the failure of this invocation.
-    var failure5XXCounter: Metrics.Counter? { get }
-    
-    /// The `Metrics.Counter` to record the failure of this invocation.
-    var failure4XXCounter: Metrics.Counter? { get }
-    
-    /// The `Metrics.Recorder` to record the duration of this invocation.
-    var latencyTimer: Metrics.Timer? { get }
-}
-
-public struct StandardSmokeRequestReporting<OperationIdentifer: OperationIdentity>: SmokeRequestReporting {
+public struct SmokeServerRequestReporting {
     public let successCounter: Metrics.Counter?
     public let failure5XXCounter: Metrics.Counter?
     public let failure4XXCounter: Metrics.Counter?
@@ -51,7 +36,7 @@ public struct StandardSmokeRequestReporting<OperationIdentifer: OperationIdentit
     private let failure4XXCountMetric = "failure4XXCount"
     private let latencyTimeMetric = "latencyTime"
     
-    public init(serverName: String, request: RequestType<OperationIdentifer>, configuration: SmokeServerReportingConfiguration<OperationIdentifer>) {
+    public init<OperationIdentifer: OperationIdentity>(serverName: String, request: RequestType<OperationIdentifer>, configuration: SmokeServerReportingConfiguration<OperationIdentifer>) {
         let operationName = request.description
         
         if configuration.reportSuccessForRequest(request) {

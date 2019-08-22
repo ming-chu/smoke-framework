@@ -33,7 +33,7 @@ public extension SmokeHTTP1HandlerSelector {
     mutating func addHandlerForOperation<InputType: ValidatableCodable, ErrorType: ErrorIdentifiableByDescription>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> ()),
+        operation: @escaping ((InputType, ContextType, SmokeServerInvocationReporting) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         inputLocation: OperationInputHTTPLocation) {
         
@@ -71,7 +71,7 @@ public extension SmokeHTTP1HandlerSelector {
         OperationDelegateType: HTTP1OperationDelegate>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> ()),
+        operation: @escaping ((InputType, ContextType, SmokeServerInvocationReporting) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         inputLocation: OperationInputHTTPLocation,
         operationDelegate: OperationDelegateType)
@@ -108,7 +108,7 @@ public extension SmokeHTTP1HandlerSelector {
         ErrorType: ErrorIdentifiableByDescription>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> ()),
+        operation: @escaping ((InputType, ContextType, SmokeServerInvocationReporting) throws -> ()),
         allowedErrors: [(ErrorType, Int)]) {
         
         let handler = OperationHandler(
@@ -137,7 +137,7 @@ public extension SmokeHTTP1HandlerSelector {
         OperationDelegateType: HTTP1OperationDelegate>(
         _ operationIdentifer: OperationIdentifer,
         httpMethod: HTTPMethod,
-        operation: @escaping ((InputType, ContextType, SmokeInvocationReporting) throws -> ()),
+        operation: @escaping ((InputType, ContextType, SmokeServerInvocationReporting) throws -> ()),
         allowedErrors: [(ErrorType, Int)],
         operationDelegate: OperationDelegateType)
     where DefaultOperationDelegateType.RequestHeadType == OperationDelegateType.RequestHeadType,
