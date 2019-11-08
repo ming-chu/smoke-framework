@@ -11,8 +11,8 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-//  OperationHandler+nonblockingWithInputWithOutput.swift
-//  SmokeOperations
+// OperationHandler+nonblockingWithContextInputNoOutput.swift
+// SmokeOperations
 //
 
 import Foundation
@@ -21,7 +21,7 @@ import Logging
 public extension OperationHandler {
     /**
        Initializer for non-blocking operation handler that has input
-       returns a result body.
+       returns a result with an empty body.
      
      - Parameters:
         - serverName: the name of the server this operation is part of.
@@ -29,20 +29,15 @@ public extension OperationHandler {
         - reportingConfiguration: the configuration for how operations on this server should be reported on.
         - inputProvider: function that obtains the input from the request.
         - operation: the handler method for the operation.
-        - outputHandler: function that completes the response with the provided output.
         - allowedErrors: the errors that can be serialized as responses
           from the operation and their error codes.
         - operationDelegate: optionally an operation-specific delegate to use when
           handling the operation.
      */
-    init<InputType: Validatable, OutputType: Validatable,
-            ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: OperationDelegate>(
-            serverName: String, operationIdentifer: OperationIdentifer,
-            reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
+    init<InputType: Validatable, ErrorType: ErrorIdentifiableByDescription, OperationDelegateType: OperationDelegate>(
+            serverName: String, operationIdentifer: OperationIdentifer, reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
             inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
-            operation: @escaping ((InputType, ContextType, @escaping
-                (Result<OutputType, Swift.Error>) -> Void) throws -> Void),
-            outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeServerInvocationContext) -> Void),
+            operation: @escaping ((InputType, ContextType, SmokeServerInvocationReporting, @escaping (Swift.Error?) -> ()) throws -> ()),
             allowedErrors: [(ErrorType, Int)],
             operationDelegate: OperationDelegateType)
     where RequestHeadType == OperationDelegateType.RequestHeadType,
@@ -50,20 +45,17 @@ public extension OperationHandler {
         
         /**
          * The wrapped input handler takes the provided operation handler and wraps it the responseHandler is
-         * called with the result when the input handler's response handler is called. If the provided operation
+         * called to indicate success when the input handler's response handler is called. If the provided operation
          * provides an error, the responseHandler is called with that error.
          */
         let wrappedInputHandler = { (input: InputType, requestHead: RequestHeadType, context: ContextType,
             responseHandler: ResponseHandlerType, invocationContext: SmokeServerInvocationContext) in
-            let handlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>?
+            let handlerResult: NoOutputOperationHandlerResult<ErrorType>?
             do {
-                try operation(input, context) { result in
-                    let asyncHandlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>
+                try operation(input, context, invocationContext.invocationReporting) { error in
+                    let asyncHandlerResult: NoOutputOperationHandlerResult<ErrorType>
                     
-                    switch result {
-                    case .success(let result):
-                        asyncHandlerResult = .success(result)
-                    case .failure(let error):
+                    if let error = error {
                         if let smokeReturnableError = error as? SmokeReturnableError {
                             asyncHandlerResult = .smokeReturnableError(smokeReturnableError,
                                                                        allowedErrors)
@@ -72,14 +64,15 @@ public extension OperationHandler {
                         } else {
                             asyncHandlerResult = .internalServerError(error)
                         }
+                    } else {
+                        asyncHandlerResult = .success
                     }
                     
-                    OperationHandler.handleWithOutputOperationHandlerResult(
+                    OperationHandler.handleNoOutputOperationHandlerResult(
                         handlerResult: asyncHandlerResult,
                         operationDelegate: operationDelegate,
                         requestHead: requestHead,
                         responseHandler: responseHandler,
-                        outputHandler: outputHandler,
                         invocationContext: invocationContext)
                 }
                 
@@ -95,19 +88,16 @@ public extension OperationHandler {
             
             // if this handler is throwing an error immediately
             if let handlerResult = handlerResult {
-                OperationHandler.handleWithOutputOperationHandlerResult(
+                OperationHandler.handleNoOutputOperationHandlerResult(
                     handlerResult: handlerResult,
                     operationDelegate: operationDelegate,
                     requestHead: requestHead,
                     responseHandler: responseHandler,
-                    outputHandler: outputHandler,
                     invocationContext: invocationContext)
             }
         }
         
-        self.init(serverName: serverName,
-                  operationIdentifer: operationIdentifer,
-                  reportingConfiguration: reportingConfiguration,
+        self.init(serverName: serverName, operationIdentifer: operationIdentifer, reportingConfiguration: reportingConfiguration,
                   inputHandler: wrappedInputHandler,
                   inputProvider: inputProvider,
                   operationDelegate: operationDelegate)

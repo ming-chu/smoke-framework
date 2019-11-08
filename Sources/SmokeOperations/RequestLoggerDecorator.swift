@@ -11,20 +11,17 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-// KeepAliveStatus.swift
-// SmokeHTTP1
+//  RequestLoggerDecorator.swift
+//  SmokeOperations
 //
-
 import Foundation
+import Logging
 
 /**
- Class that shares the keepAlive status of a HTTP Request between the
- HTTPChannelInboundHandler and HttpResponseHandler.
+ Defines that a `SmokeServerInvocationReporting` instance can be retrieved from conforming types.
  */
-class KeepAliveStatus {
-    var state: Bool
-    
-    init(state: Bool) {
-        self.state = state
-    }
+public protocol RequestLoggerDecorator {
+
+    /// The `Logging.Logger` to use for logging for this invocation.
+    func decorate(requestLogger: inout Logger)
 }

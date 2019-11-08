@@ -11,7 +11,7 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-// OperationHandler+blockingWithInputWithOutput.swift
+// OperationHandler+blockingWithContextInputWithOutput.swift
 // SmokeOperations
 //
 
@@ -37,10 +37,9 @@ public extension OperationHandler {
      */
     init<InputType: Validatable, OutputType: Validatable, ErrorType: ErrorIdentifiableByDescription,
         OperationDelegateType: OperationDelegate>(
-            serverName: String, operationIdentifer: OperationIdentifer,
-            reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
+            serverName: String, operationIdentifer: OperationIdentifer, reportingConfiguration: SmokeServerReportingConfiguration<OperationIdentifer>,
             inputProvider: @escaping (RequestHeadType, Data?) throws -> InputType,
-            operation: @escaping (InputType, ContextType) throws -> OutputType,
+            operation: @escaping (InputType, ContextType, SmokeServerInvocationReporting) throws -> OutputType,
             outputHandler: @escaping ((RequestHeadType, OutputType, ResponseHandlerType, SmokeServerInvocationContext) -> Void),
             allowedErrors: [(ErrorType, Int)],
             operationDelegate: OperationDelegateType)
@@ -57,7 +56,7 @@ public extension OperationHandler {
                                      invocationContext: SmokeServerInvocationContext) in
             let handlerResult: WithOutputOperationHandlerResult<OutputType, ErrorType>
             do {
-                let output = try operation(input, context)
+                let output = try operation(input, context, invocationContext.invocationReporting)
                 
                 handlerResult = .success(output)
             } catch let smokeReturnableError as SmokeReturnableError {
@@ -77,9 +76,7 @@ public extension OperationHandler {
                 invocationContext: invocationContext)
         }
         
-        self.init(serverName: serverName,
-                  operationIdentifer: operationIdentifer,
-                  reportingConfiguration: reportingConfiguration,
+        self.init(serverName: serverName, operationIdentifer: operationIdentifer, reportingConfiguration: reportingConfiguration,
                   inputHandler: wrappedInputHandler,
                   inputProvider: inputProvider,
                   operationDelegate: operationDelegate)

@@ -11,20 +11,18 @@
 // express or implied. See the License for the specific language governing
 // permissions and limitations under the License.
 //
-// KeepAliveStatus.swift
-// SmokeHTTP1
+//  SmokeServerInvocationReporting.swift
+//  SmokeOperations
 //
-
 import Foundation
 
-/**
- Class that shares the keepAlive status of a HTTP Request between the
- HTTPChannelInboundHandler and HttpResponseHandler.
- */
-class KeepAliveStatus {
-    var state: Bool
+public struct SmokeServerInvocationContext {
+    public let invocationReporting: SmokeServerInvocationReporting
+    public let requestReporting: SmokeServerRequestReporting
     
-    init(state: Bool) {
-        self.state = state
+    public init(invocationReporting: SmokeServerInvocationReporting,
+                requestReporting: SmokeServerRequestReporting) {
+        self.invocationReporting = invocationReporting
+        self.requestReporting = requestReporting
     }
 }
